@@ -149,11 +149,6 @@ export default function Home() {
       <div className="body" data-page="home">
         <Navbar />
         <div className="page_wrapper">
-        {/* Large spanning student photo */}
-        <div className="spanning-student-wrapper">
-         
-        </div>
-
         {/* HERO */}
         <header className="section_hero">
           <div className="hero_inner">
@@ -184,7 +179,8 @@ export default function Home() {
                 style={{ 
                   transform: parallaxTransform,
                   width: `${wrapperWidth}px`,
-                  transition: 'width 0.4s ease-out'
+                  transition: 'width 0.4s ease-out',
+                  maxWidth: '100%'
                 }}
               >
                 <div className="swiper-wrapper" style={{ gridTemplateColumns: `repeat(${visibleImages}, 1fr)` }}>
@@ -291,8 +287,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+        </div>
       </div>
-    </div>
       <Footer />
     </>
   );

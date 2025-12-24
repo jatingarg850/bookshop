@@ -5,17 +5,19 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
 const navItems = [
-  { label: 'Home', href: '#' },
-  { label: 'Featured', href: '#featured' },
-  { label: 'Shop', href: '#shop' },
-  { label: 'Newsletter', href: '#newsletter' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Home', href: '/' },
+  { label: 'Featured', href: '/featured' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Newsletter', href: '/newsletter' },
+  { label: 'About', href: '/about' },
+  { label: 'Admin', href: '/admin-login' },
 ];
 
 export function Navbar() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,21 +45,21 @@ export function Navbar() {
       animate={{ y: isVisible ? 0 : -100 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <nav className="mx-auto flex h-24 max-w-7xl items-center justify-between px-8">
+      <nav className="mx-auto flex h-20 md:h-24 max-w-7xl items-center justify-between px-4 md:px-8">
         {/* Logo Left */}
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center flex-shrink-0">
           <div className="flex flex-col">
-            <span className="text-2xl font-bold tracking-[0.3em] text-black">
+            <span className="text-lg md:text-2xl font-bold tracking-[0.2em] md:tracking-[0.3em] text-black">
               BOOKSTORE
             </span>
-            <span className="text-xs tracking-[0.2em] text-black/60 mt-1">
+            <span className="text-xs tracking-[0.15em] md:tracking-[0.2em] text-black/60 mt-0.5 md:mt-1">
               DISCOVER STORIES
             </span>
           </div>
         </Link>
 
-        {/* Links Right */}
-        <div className="relative flex items-center gap-12 text-xs font-semibold tracking-[0.15em] uppercase text-black">
+        {/* Desktop Links */}
+        <div className="hidden md:flex relative items-center gap-8 lg:gap-12 text-xs font-semibold tracking-[0.15em] uppercase text-black">
           {navItems.map((item) => {
             const isCurrent = hovered === item.label;
 
@@ -87,7 +89,40 @@ export function Navbar() {
             );
           })}
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden flex flex-col gap-1.5 p-2"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className={`w-6 h-0.5 bg-black transition-all ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+          <span className={`w-6 h-0.5 bg-black transition-all ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`w-6 h-0.5 bg-black transition-all ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+        </button>
       </nav>
+
+      {/* Mobile Menu */}
+      <motion.div
+        className="md:hidden bg-white border-t border-black/5"
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: mobileMenuOpen ? 'auto' : 0, opacity: mobileMenuOpen ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        style={{ overflow: 'hidden' }}
+      >
+        <div className="flex flex-col gap-0 px-4 py-4">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="py-3 px-2 text-sm font-semibold tracking-[0.1em] uppercase text-black hover:text-[#c4a177] transition-colors border-b border-black/5 last:border-b-0"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </motion.div>
     </motion.header>
   );
 }

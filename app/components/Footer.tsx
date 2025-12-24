@@ -98,28 +98,43 @@ export function Footer() {
 
         <ul className="links">
           <li>
-            <a href="#" className="footer-link">
+            <a href="/" className="footer-link">
               Home
             </a>
           </li>
           <li>
-            <a href="#featured" className="footer-link">
+            <a href="/featured" className="footer-link">
               Featured
             </a>
           </li>
           <li>
-            <a href="#shop" className="footer-link">
+            <a href="/shop" className="footer-link">
               Shop
             </a>
           </li>
           <li>
-            <a href="#newsletter" className="footer-link">
+            <a href="/newsletter" className="footer-link">
               Newsletter
             </a>
           </li>
           <li>
-            <a href="#" className="footer-link">
-              Contact
+            <a href="/privacy-policy" className="footer-link">
+              Privacy
+            </a>
+          </li>
+          <li>
+            <a href="/return-policy" className="footer-link">
+              Returns
+            </a>
+          </li>
+          <li>
+            <a href="/shipping-policy" className="footer-link">
+              Shipping
+            </a>
+          </li>
+          <li>
+            <a href="/admin" className="footer-link">
+              Admin
             </a>
           </li>
         </ul>
