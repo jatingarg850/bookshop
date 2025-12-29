@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db/connect';
 import Product from '@/lib/db/models/Product';
 import mongoose from 'mongoose';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

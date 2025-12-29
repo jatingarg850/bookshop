@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db/connect';
 import Delivery from '@/lib/db/models/Delivery';
 import { getShiprocketClient } from '@/lib/utils/shiprocket';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
