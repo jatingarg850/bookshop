@@ -79,23 +79,19 @@ export function Footer() {
               <div className="flex items-start space-x-3">
                 <span className="text-primary-400 flex-shrink-0">📍</span>
                 <span className="text-gray-400">
-                  123 Main Street, Commerce Area, Your City - 400001
+                  J - 90 , DLF , Sector 10, Faridabad, Haryana - 121006
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <span className="text-primary-400 flex-shrink-0">📞</span>
-                <span className="text-gray-400">+91 98765 43210</span>
+                <span className="text-gray-400">+91 98217 38866</span>
               </div>
               <div className="flex items-center space-x-3">
                 <span className="text-primary-400 flex-shrink-0">✉️</span>
-                <span className="text-gray-400">info@radhe-stationery.com</span>
+                <span className="text-gray-400">sre.haryana24@gmail.com</span>
               </div>
               <div className="flex items-start space-x-3">
-                <span className="text-primary-400 flex-shrink-0">🕐</span>
-                <div className="text-gray-400">
-                  <div>Mon - Sat: 9:00 AM - 8:00 PM</div>
-                  <div>Sunday: 10:00 AM - 6:00 PM</div>
-                </div>
+              
               </div>
             </div>
           </div>

@@ -25,14 +25,14 @@ export function Header() {
           <div className="flex justify-between items-center h-10 text-sm">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <span>📞 +91 98765 43210</span>
+                <span>📞 +91 98217 38866</span>
               </div>
               <div className="hidden sm:flex items-center space-x-2">
-                <span>✉️ info@radhe-stationery.com</span>
+                <span>✉️ sre.haryana24@gmail.com</span>
               </div>
             </div>
             <div className="hidden sm:block">
-              <span>Free delivery on orders above ₹500</span>
+              
             </div>
           </div>
         </div>

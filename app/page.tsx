@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ProductCard } from '@/components/products/ProductCard';
 import { connectDB } from '@/lib/db/connect';
 import Product from '@/lib/db/models/Product';
@@ -116,90 +115,7 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Product Categories */}
-      <section className="py-16 bg-gray-50 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Shop by Category
-            </h2>
-            <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-600">
-              Explore our wide range of stationery products for all your needs
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { 
-                name: 'Notebooks & Diaries', 
-                image: '/stack-of-books.png', 
-                href: '/products?category=books',
-                items: ['Notebooks', 'Diaries', 'Planners', 'Journals']
-              },
-              { 
-                name: 'Writing Instruments', 
-                image: '/stationery.png', 
-                href: '/products?category=stationery',
-                items: ['Pens', 'Pencils', 'Markers', 'Highlighters']
-              },
-              { 
-                name: 'Art & Craft', 
-                image: '/palette.png', 
-                href: '/products?category=art',
-                items: ['Color Pencils', 'Paints', 'Brushes', 'Craft Paper']
-              },
-              { 
-                name: 'Craft Supplies', 
-                image: '/paper-crafts.png', 
-                href: '/products?category=craft',
-                items: ['Paper', 'Scissors', 'Glue', 'Tape']
-              },
-              { 
-                name: 'Office Supplies', 
-                image: '/stack-of-books.png', 
-                href: '/products',
-                items: ['Files', 'Folders', 'Staplers', 'Paper Clips']
-              },
-              { 
-                name: 'School Supplies', 
-                image: '/stationery.png', 
-                href: '/products',
-                items: ['Erasers', 'Rulers', 'Geometry Box', 'School Bags']
-              },
-            ].map((cat) => (
-              <Link key={cat.name} href={cat.href}>
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group h-full">
-                  <div className="aspect-video relative h-48 overflow-hidden bg-gray-200">
-                    <img 
-                      src={cat.image} 
-                      alt={cat.name} 
-                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 p-4"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-opacity" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <h3 className="text-xl font-semibold text-white text-center px-4">
-                        {cat.name}
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex flex-wrap gap-2">
-                      {cat.items.map((item, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-primary-100 text-primary-700"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* Featured Products */}
       {featuredProducts.length > 0 && (

@@ -316,16 +316,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             )}
 
             {/* GST Rates */}
-            {(product.cgst || product.sgst || product.igst) && (
-              <Card>
-                <h3 className="font-heading text-lg font-bold mb-4">GST Rates</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {product.cgst && <div><span className="text-gray-500">CGST:</span> <span className="font-semibold">{product.cgst}%</span></div>}
-                  {product.sgst && <div><span className="text-gray-500">SGST:</span> <span className="font-semibold">{product.sgst}%</span></div>}
-                  {product.igst && <div><span className="text-gray-500">IGST:</span> <span className="font-semibold">{product.igst}%</span></div>}
-                </div>
-              </Card>
-            )}
+            
           </div>
         )}
 

@@ -15,7 +15,6 @@ export default function CartPage() {
   const subtotal = useCartStore((state) => state.getSubtotal());
   const [mounted, setMounted] = useState(false);
   const [settings, setSettings] = useState<any>(null);
-  const [productDetails, setProductDetails] = useState<any>({});
   const [taxBreakdown, setTaxBreakdown] = useState<any>(null);
   const [shippingCost, setShippingCost] = useState(0);
 
@@ -54,7 +53,6 @@ export default function CartPage() {
         data.products.forEach((product: any) => {
           detailsMap[product._id] = product;
         });
-        setProductDetails(detailsMap);
 
         // Calculate tax breakdown with product-level rates
         const itemsWithTax = items.map((item) => {

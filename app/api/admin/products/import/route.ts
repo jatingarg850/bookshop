@@ -21,6 +21,33 @@ interface ImportRow {
   'Images': string;
   'Rating': string;
   'Review Count': string;
+  'HSN': string;
+  'Brand': string;
+  'Manufacturer': string;
+  'Qty Per Item': string;
+  'Unit': string;
+  'Weight': string;
+  'Weight Unit': string;
+  'Material': string;
+  'Color': string;
+  'Size': string;
+  'Warranty': string;
+  'Country Of Origin': string;
+  'Min Order Qty': string;
+  'Max Order Qty': string;
+  'Is Featured': string;
+  'Is New Arrival': string;
+  'Is Best Seller': string;
+  'Features': string;
+  'Specifications': string;
+  'Length': string;
+  'Width': string;
+  'Height': string;
+  'Breadth': string;
+  'Dimension Unit': string;
+  'CGST': string;
+  'SGST': string;
+  'IGST': string;
 }
 
 async function checkAdmin() {
@@ -177,6 +204,41 @@ export async function POST(req: NextRequest) {
             : [],
           rating: row['Rating'] ? parseFloat(row['Rating']) : undefined,
           reviewCount: row['Review Count'] ? parseInt(row['Review Count']) : 0,
+          // New fields
+          hsn: row['HSN'] || undefined,
+          brand: row['Brand'] || undefined,
+          manufacturer: row['Manufacturer'] || undefined,
+          quantityPerItem: row['Qty Per Item'] ? parseInt(row['Qty Per Item']) : undefined,
+          unit: row['Unit'] || undefined,
+          weight: row['Weight'] ? parseFloat(row['Weight']) : undefined,
+          weightUnit: row['Weight Unit'] || undefined,
+          material: row['Material'] || undefined,
+          color: row['Color'] || undefined,
+          size: row['Size'] || undefined,
+          warranty: row['Warranty'] || undefined,
+          countryOfOrigin: row['Country Of Origin'] || 'India',
+          minOrderQuantity: row['Min Order Qty'] ? parseInt(row['Min Order Qty']) : undefined,
+          maxOrderQuantity: row['Max Order Qty'] ? parseInt(row['Max Order Qty']) : undefined,
+          isFeatured: row['Is Featured']?.toLowerCase() === 'true',
+          isNewArrival: row['Is New Arrival']?.toLowerCase() === 'true',
+          isBestSeller: row['Is Best Seller']?.toLowerCase() === 'true',
+          features: row['Features'] ? row['Features'].split(';').map(f => f.trim()).filter(Boolean) : undefined,
+          specifications: row['Specifications'] ? Object.fromEntries(
+            row['Specifications'].split(';').map(s => {
+              const [key, value] = s.split(':').map(p => p.trim());
+              return [key, value];
+            }).filter(([k, v]) => k && v)
+          ) : undefined,
+          dimensions: (row['Length'] || row['Width'] || row['Height'] || row['Breadth']) ? {
+            length: row['Length'] ? parseFloat(row['Length']) : undefined,
+            width: row['Width'] ? parseFloat(row['Width']) : undefined,
+            height: row['Height'] ? parseFloat(row['Height']) : undefined,
+            breadth: row['Breadth'] ? parseFloat(row['Breadth']) : undefined,
+            unit: row['Dimension Unit'] || 'cm',
+          } : undefined,
+          cgst: row['CGST'] ? parseFloat(row['CGST']) : undefined,
+          sgst: row['SGST'] ? parseFloat(row['SGST']) : undefined,
+          igst: row['IGST'] ? parseFloat(row['IGST']) : undefined,
         };
 
         console.log(`Row ${i + 2} - SKU: ${productData.sku}, Status from CSV: "${row['Status']}", Parsed Status: "${productData.status}"`);
@@ -207,6 +269,30 @@ export async function POST(req: NextRequest) {
             discountPrice: productData.discountPrice || null,
             rating: productData.rating || null,
             reviewCount: productData.reviewCount || 0,
+            // New fields
+            hsn: productData.hsn || null,
+            brand: productData.brand || null,
+            manufacturer: productData.manufacturer || null,
+            quantityPerItem: productData.quantityPerItem || null,
+            unit: productData.unit || null,
+            weight: productData.weight || null,
+            weightUnit: productData.weightUnit || null,
+            material: productData.material || null,
+            color: productData.color || null,
+            size: productData.size || null,
+            warranty: productData.warranty || null,
+            countryOfOrigin: productData.countryOfOrigin || 'India',
+            minOrderQuantity: productData.minOrderQuantity || null,
+            maxOrderQuantity: productData.maxOrderQuantity || null,
+            isFeatured: productData.isFeatured,
+            isNewArrival: productData.isNewArrival,
+            isBestSeller: productData.isBestSeller,
+            features: productData.features || null,
+            specifications: productData.specifications || null,
+            dimensions: productData.dimensions || null,
+            cgst: productData.cgst || null,
+            sgst: productData.sgst || null,
+            igst: productData.igst || null,
           };
 
           console.log(`Row ${i + 2} - Updating product ${existingProduct._id}`, updateData);

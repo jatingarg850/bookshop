@@ -274,31 +274,55 @@ export default function AdminOrderDetailPage() {
 
         {/* Delivery Status */}
         {delivery && (
-          <Card>
+          <Card className="mb-6">
             <h2 className="font-semibold text-lg mb-4">Delivery Status</h2>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-600">Tracking Number</p>
-                <p className="font-mono font-bold">{delivery.trackingNumber}</p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600">Tracking Number</p>
+                  <p className="font-mono font-bold text-lg">{delivery.trackingNumber}</p>
+                </div>
+                <span className={`px-4 py-2 rounded-full font-semibold text-sm ${getStatusBadgeColor(delivery.status)}`}>
+                  {formatStatus(delivery.status)}
+                </span>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Carrier</p>
-                <p className="font-semibold">{delivery.carrier}</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Carrier</p>
+                  <p className="font-semibold">{delivery.carrier}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Est. Delivery</p>
+                  <p className="font-semibold">
+                    {new Date(delivery.estimatedDeliveryDate).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Status</p>
-                <p className="font-semibold capitalize">{delivery.status.replace('_', ' ')}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Location</p>
-                <p className="font-semibold">{delivery.location}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Est. Delivery</p>
-                <p className="font-semibold">
-                  {new Date(delivery.estimatedDeliveryDate).toLocaleDateString()}
-                </p>
-              </div>
+
+              {delivery.actualDeliveryDate && (
+                <div>
+                  <p className="text-sm text-gray-600">Delivered On</p>
+                  <p className="font-semibold text-green-600">
+                    {new Date(delivery.actualDeliveryDate).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+
+              {delivery.location && (
+                <div>
+                  <p className="text-sm text-gray-600">Current Location</p>
+                  <p className="font-semibold">{delivery.location}</p>
+                </div>
+              )}
+
+              {delivery.notes && (
+                <div>
+                  <p className="text-sm text-gray-600">Latest Update</p>
+                  <p className="font-semibold">{delivery.notes}</p>
+                </div>
+              )}
+
               {delivery.shiprocketAWB && (
                 <Button
                   onClick={handleTrackOrder}
@@ -319,4 +343,30 @@ export default function AdminOrderDetailPage() {
 function calculateWeight(items: any[]): number {
   const defaultWeightPerItem = 0.5;
   return items.reduce((total, item) => total + item.quantity * defaultWeightPerItem, 0);
+}
+
+function getStatusBadgeColor(status: string): string {
+  switch (status) {
+    case 'delivered':
+      return 'bg-green-100 text-green-700';
+    case 'out_for_delivery':
+      return 'bg-blue-100 text-blue-700';
+    case 'in_transit':
+      return 'bg-blue-100 text-blue-700';
+    case 'picked_up':
+      return 'bg-yellow-100 text-yellow-700';
+    case 'pending':
+      return 'bg-gray-100 text-gray-700';
+    case 'failed':
+      return 'bg-red-100 text-red-700';
+    default:
+      return 'bg-gray-100 text-gray-700';
+  }
+}
+
+function formatStatus(status: string): string {
+  return status
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }

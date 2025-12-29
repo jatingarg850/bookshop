@@ -125,26 +125,22 @@ export default function ContactPage() {
                 <div className="space-y-6">
                   <div>
                     <p className="text-sm text-gray-600 mb-2 font-semibold">📧 Email</p>
-                    <p className="font-semibold text-gray-900">info@radhe-stationery.com</p>
+                    <p className="font-semibold text-gray-900">sre.haryana24@gmail.com</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-2 font-semibold">📞 Phone</p>
-                    <p className="font-semibold text-gray-900">+91 98765 43210</p>
+                    <p className="font-semibold text-gray-900">+91 98217 38866</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-2 font-semibold">📍 Address</p>
                     <p className="font-semibold text-gray-900">
-                      123 Main Street<br />
-                      Commerce Area<br />
-                      Your City - 400001
+                      J - 90 , DLF , Sector 10<br />
+                      Faridabad<br />
+                      Haryana - 121006
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">🕐 Hours</p>
-                    <p className="font-semibold text-gray-900">
-                      Mon - Sat: 9:00 AM - 8:00 PM<br />
-                      Sunday: 10:00 AM - 6:00 PM
-                    </p>
+                   
                   </div>
                 </div>
               </Card>
