@@ -1,73 +1,122 @@
-'use client';
+import { Card } from '@/components/ui/Card';
 
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-
-export default function About() {
+export default function AboutPage() {
   return (
-    <>
-      <div className="body" data-page="about">
-        <Navbar />
-        <div className="page_wrapper">
-          <section className="section section-light">
-            <div className="container">
-              <h1 className="page-title">About Us</h1>
-              <p className="page-subtitle">Discover the story behind BookStore</p>
-              
-              <div style={{ marginTop: '3rem', lineHeight: '1.8' }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                  <h2>Our Mission</h2>
-                  <p>
-                    At BookStore, we believe that books have the power to transform lives, inspire minds, and connect communities. 
-                    Our mission is to make quality literature accessible to everyone, regardless of their background or location.
-                  </p>
-
-                  <h2 style={{ marginTop: '2rem' }}>Our Story</h2>
-                  <p>
-                    Founded in 2020, BookStore started as a small passion project by a group of book enthusiasts who wanted to 
-                    create a platform where readers could discover their next favorite book. What began as a simple idea has 
-                    grown into a thriving community of thousands of book lovers.
-                  </p>
-
-                  <h2 style={{ marginTop: '2rem' }}>What We Offer</h2>
-                  <ul style={{ fontSize: '1rem', color: '#2c2520' }}>
-                    <li>Curated collections of bestselling and indie books</li>
-                    <li>Personalized book recommendations</li>
-                    <li>Exclusive author interviews and events</li>
-                    <li>Fast and reliable shipping worldwide</li>
-                    <li>A supportive community of readers</li>
-                  </ul>
-
-                  <h2 style={{ marginTop: '2rem' }}>Our Values</h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginTop: '1rem' }}>
-                    <div style={{ background: '#f9f9f9', padding: '1.5rem', borderRadius: '1rem' }}>
-                      <h3 style={{ marginTop: 0 }}>Quality</h3>
-                      <p>We carefully select every book to ensure the highest quality for our readers.</p>
-                    </div>
-                    <div style={{ background: '#f9f9f9', padding: '1.5rem', borderRadius: '1rem' }}>
-                      <h3 style={{ marginTop: 0 }}>Community</h3>
-                      <p>We foster a welcoming space where readers can connect and share their love of books.</p>
-                    </div>
-                    <div style={{ background: '#f9f9f9', padding: '1.5rem', borderRadius: '1rem' }}>
-                      <h3 style={{ marginTop: 0 }}>Innovation</h3>
-                      <p>We continuously improve our platform to provide the best reading experience.</p>
-                    </div>
-                  </div>
-
-                  <h2 style={{ marginTop: '2rem' }}>Contact Us</h2>
-                  <p>
-                    Have questions? We'd love to hear from you! Reach out to us at{' '}
-                    <a href="mailto:hello@bookstore.com" style={{ color: '#c4a177', textDecoration: 'none' }}>
-                      hello@bookstore.com
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+    <div>
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden py-12 sm:py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center">
+            <h1 className="text-4xl tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+              <span className="block">About</span>
+              <span className="block text-primary-600">Radhe Stationery</span>
+            </h1>
+            <p className="mt-3 text-base text-gray-600 sm:mt-5 sm:text-lg md:mt-5 md:text-xl">
+              Your trusted partner for quality stationery and school supplies
+            </p>
+          </div>
         </div>
-      </div>
-      <Footer />
-    </>
+      </section>
+
+      {/* About Section */}
+      <section className="py-16 bg-white relative">
+        <div className="absolute left-0 top-0 bottom-0 w-32 pointer-events-none z-0">
+          <img src="/left-border.png" alt="" className="h-full w-full object-cover" />
+        </div>
+        <div className="absolute right-0 top-0 bottom-0 w-32 pointer-events-none z-0">
+          <img src="/right-border.png" alt="" className="h-full w-full object-cover" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Our Story */}
+              <Card className="shadow-lg">
+                <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Our Story</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Radhe Stationery was founded with a simple mission: to make quality school books, art supplies, and stationery accessible to every student and creative individual in India. We believe that the right tools can inspire creativity and help students excel in their studies.
+                </p>
+                <p className="text-gray-700 leading-relaxed mt-4">
+                  What started as a small local shop has grown into a trusted online destination for stationery lovers across the country. We remain committed to our core values of quality, affordability, and customer satisfaction.
+                </p>
+              </Card>
+
+              {/* Our Mission */}
+              <Card className="shadow-lg">
+                <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Our Mission</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We are committed to providing a curated selection of high-quality products at competitive prices. Our team carefully selects each item to ensure it meets our standards for quality, durability, and value. Whether you're a student, artist, or professional, we have something for everyone.
+                </p>
+                <p className="text-gray-700 leading-relaxed mt-4">
+                  Our mission extends beyond just selling products. We aim to support education and creativity by making premium stationery affordable and accessible to all.
+                </p>
+              </Card>
+
+              {/* Why Choose Us */}
+              <Card className="shadow-lg">
+                <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Why Choose Us?</h2>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex gap-3">
+                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <span>Wide selection of products across all categories</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <span>Competitive pricing and regular discounts</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <span>Fast and reliable delivery across India</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <span>Easy returns and hassle-free customer support</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <span>Secure payment options and data protection</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <span>Authentic products from trusted brands</span>
+                  </li>
+                </ul>
+              </Card>
+            </div>
+
+            {/* Sidebar */}
+            <div>
+              <Card className="shadow-lg sticky top-24">
+                <h2 className="font-heading text-xl font-bold mb-6 text-gray-900">Quick Info</h2>
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">📧 Email</p>
+                    <p className="font-semibold text-gray-900">info@radhe-stationery.com</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">📞 Phone</p>
+                    <p className="font-semibold text-gray-900">+91 98765 43210</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">📍 Address</p>
+                    <p className="font-semibold text-gray-900">
+                      123 Main Street<br />
+                      Commerce Area<br />
+                      Your City - 400001
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">🕐 Hours</p>
+                    <p className="font-semibold text-gray-900 text-sm">
+                      Mon - Sat: 9:00 AM - 8:00 PM<br />
+                      Sunday: 10:00 AM - 6:00 PM
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

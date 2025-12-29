@@ -1,33 +1,35 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from 'next';
+import { Providers } from './providers';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "BookStore - Discover Your Next Great Read",
-  description: "Explore curated collections of bestselling books across all genres. Find your next favorite story today.",
+  title: 'Radhe Stationery - School Books & Art Supplies',
+  description: 'Online store for school books, art supplies, craft materials, and stationery in India.',
+  keywords: 'books, stationery, art supplies, craft materials, school supplies',
+  icons: {
+    icon: '/logo.jpg',
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className="bg-gray-50">
+        <Providers>
+          <Header />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

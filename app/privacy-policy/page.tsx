@@ -1,90 +1,66 @@
-'use client';
+import { Card } from '@/components/ui/Card';
 
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-
-export default function PrivacyPolicy() {
+export default function PrivacyPolicyPage() {
   return (
-    <>
-      <div className="body" data-page="privacy">
-        <Navbar />
-        <div className="page_wrapper">
-          <section className="section section-light">
-            <div className="container">
-              <h1 className="page-title">Privacy Policy</h1>
-              <p className="page-subtitle">Last updated: December 2024</p>
+    <div className="container-max py-12">
+      <h1 className="font-heading text-4xl font-bold mb-8">Privacy Policy</h1>
 
-              <div style={{ maxWidth: '800px', margin: '2rem auto', lineHeight: '1.8', color: '#2c2520' }}>
-                <h2>1. Introduction</h2>
-                <p>
-                  BookStore ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
-                </p>
+      <Card className="space-y-6">
+        <section>
+          <h2 className="font-heading text-2xl font-bold mb-3">1. Introduction</h2>
+          <p className="text-gray-700">
+            Radhe Stationery ("we", "us", "our", or "Company") operates the radhestationery.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.
+          </p>
+        </section>
 
-                <h2>2. Information We Collect</h2>
-                <p>We may collect information about you in a variety of ways. The information we may collect on the Site includes:</p>
-                <ul>
-                  <li><strong>Personal Data:</strong> Name, email address, phone number, shipping address, and billing address when you make a purchase or create an account.</li>
-                  <li><strong>Payment Information:</strong> Credit card details and other payment information (processed securely through third-party payment processors).</li>
-                  <li><strong>Usage Data:</strong> Information about how you interact with our website, including pages visited, time spent, and links clicked.</li>
-                  <li><strong>Device Information:</strong> Browser type, IP address, operating system, and device identifiers.</li>
-                </ul>
+        <section>
+          <h2 className="font-heading text-2xl font-bold mb-3">2. Information Collection and Use</h2>
+          <p className="text-gray-700 mb-3">
+            We collect several different types of information for various purposes to provide and improve our Service to you.
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-gray-700">
+            <li>Personal Data: Name, email address, phone number, shipping address</li>
+            <li>Payment Information: Credit card details (processed securely through Razorpay)</li>
+            <li>Usage Data: Browser type, IP address, pages visited, time spent</li>
+          </ul>
+        </section>
 
-                <h2>3. How We Use Your Information</h2>
-                <p>We use the information we collect to:</p>
-                <ul>
-                  <li>Process and fulfill your orders</li>
-                  <li>Send you order confirmations and updates</li>
-                  <li>Respond to your inquiries and customer service requests</li>
-                  <li>Send promotional emails and newsletters (with your consent)</li>
-                  <li>Improve our website and services</li>
-                  <li>Prevent fraudulent transactions</li>
-                  <li>Comply with legal obligations</li>
-                </ul>
+        <section>
+          <h2 className="font-heading text-2xl font-bold mb-3">3. Use of Data</h2>
+          <p className="text-gray-700">
+            Radhe Stationery uses the collected data for various purposes:
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-gray-700 mt-3">
+            <li>To provide and maintain our Service</li>
+            <li>To notify you about changes to our Service</li>
+            <li>To allow you to participate in interactive features</li>
+            <li>To provide customer support</li>
+            <li>To gather analysis or valuable information to improve our Service</li>
+            <li>To monitor the usage of our Service</li>
+          </ul>
+        </section>
 
-                <h2>4. Sharing Your Information</h2>
-                <p>
-                  We do not sell, trade, or rent your personal information to third parties. We may share your information with:
-                </p>
-                <ul>
-                  <li>Service providers who assist us in operating our website and conducting our business</li>
-                  <li>Payment processors to process your transactions</li>
-                  <li>Shipping partners to deliver your orders</li>
-                  <li>Law enforcement when required by law</li>
-                </ul>
+        <section>
+          <h2 className="font-heading text-2xl font-bold mb-3">4. Security of Data</h2>
+          <p className="text-gray-700">
+            The security of your data is important to us but remember that no method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.
+          </p>
+        </section>
 
-                <h2>5. Data Security</h2>
-                <p>
-                  We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet is 100% secure.
-                </p>
+        <section>
+          <h2 className="font-heading text-2xl font-bold mb-3">5. Changes to This Privacy Policy</h2>
+          <p className="text-gray-700">
+            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "effective date" at the top of this Privacy Policy.
+          </p>
+        </section>
 
-                <h2>6. Your Rights</h2>
-                <p>You have the right to:</p>
-                <ul>
-                  <li>Access your personal information</li>
-                  <li>Correct inaccurate data</li>
-                  <li>Request deletion of your data</li>
-                  <li>Opt-out of marketing communications</li>
-                  <li>Data portability</li>
-                </ul>
-
-                <h2>7. Cookies</h2>
-                <p>
-                  Our website uses cookies to enhance your experience. You can control cookie settings through your browser preferences.
-                </p>
-
-                <h2>8. Contact Us</h2>
-                <p>
-                  If you have questions about this Privacy Policy, please contact us at:{' '}
-                  <a href="mailto:privacy@bookstore.com" style={{ color: '#c4a177', textDecoration: 'none' }}>
-                    privacy@bookstore.com
-                  </a>
-                </p>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-      <Footer />
-    </>
+        <section>
+          <h2 className="font-heading text-2xl font-bold mb-3">6. Contact Us</h2>
+          <p className="text-gray-700">
+            If you have any questions about this Privacy Policy, please contact us at support@radhestationery.com
+          </p>
+        </section>
+      </Card>
+    </div>
   );
 }

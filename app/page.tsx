@@ -1,295 +1,237 @@
-'use client';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ProductCard } from '@/components/products/ProductCard';
+import { connectDB } from '@/lib/db/connect';
+import Product from '@/lib/db/models/Product';
 
-import { useEffect, useRef, useState } from 'react';
-import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
+interface ProductData {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  category: string;
+  price: number;
+  discountPrice?: number;
+  images: Array<{
+    url: string;
+    alt?: string;
+  }>;
+  stock: number;
+}
 
-export default function Home() {
-  const heroWrapperRef = useRef<HTMLDivElement>(null);
-  const [visibleImages, setVisibleImages] = useState(1);
-  const [parallaxTransform, setParallaxTransform] = useState('');
-  const [wrapperWidth, setWrapperWidth] = useState(360);
+async function getFeaturedProducts(): Promise<ProductData[]> {
+  try {
+    await connectDB();
+    const products = await Product.find({ isActive: true })
+      .sort('-createdAt')
+      .limit(8)
+      .lean() as unknown as ProductData[];
+    return products;
+  } catch (error) {
+    console.error('Failed to fetch featured products:', error);
+    return [];
+  }
+}
 
-  const heroImages = [
-    '/pexels-photo-45717.webp',
-    '/glasses-resting-on-stack-of-teal-books-with-mug-in-soft-natural-light-free-photo.jpeg',
-    '/gettyimages-1455958786-612x612.jpg',
-    '/download.jpeg',
-  ];
-
-  useEffect(() => {
-    // Remove unresolved state for initial fade
-    window.addEventListener('load', () => {
-      document.body.removeAttribute('unresolved');
-    });
-
-    // Parallax scroll effect for hero section
-    const handleScroll = () => {
-      if (!heroWrapperRef.current) return;
-
-      const heroSection = document.querySelector('.section_hero') as HTMLElement;
-      if (!heroSection) return;
-
-      const heroRect = heroSection.getBoundingClientRect();
-      const heroHeight = heroRect.height;
-      const windowHeight = window.innerHeight;
-      
-      // Calculate scroll progress: 0 when hero is at bottom of viewport, 1 when hero is at top
-      const scrollProgress = Math.max(0, Math.min(1, (windowHeight - heroRect.top) / (windowHeight + heroHeight)));
-
-      // Calculate number of visible images: 1 -> 2 -> 3 -> 4 gradually
-      // At 0% scroll: 1 image
-      // At 33% scroll: 2 images
-      // At 66% scroll: 3 images
-      // At 100% scroll: 4 images
-      let imageCount = 1;
-      if (scrollProgress > 0.25) imageCount = 2;
-      if (scrollProgress > 0.5) imageCount = 3;
-      if (scrollProgress > 0.75) imageCount = 4;
-      
-      setVisibleImages(imageCount);
-
-      // Calculate width based on number of images
-      // 1 image: 360px, 2 images: 500px, 3 images: 700px, 4 images: 900px
-      const widthMap = [360, 500, 700, 900];
-      const newWidth = widthMap[imageCount - 1];
-      setWrapperWidth(newWidth);
-
-      // Calculate parallax transform
-      const translateY = scrollProgress * 40;
-      const scale = 0.73 + scrollProgress * 0.27;
-      const rotate = scrollProgress * -5.37;
-
-      setParallaxTransform(
-        `translate3d(0px, ${translateY}px, 0px) rotate(${rotate}deg) scale(${scale}, ${scale})`
-      );
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    // Scroll reveal for elements with .reveal-on-scroll
-    const revealEls = document.querySelectorAll('.reveal-on-scroll');
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible');
-            }
-          });
-        },
-        {
-          threshold: 0.15,
-        }
-      );
-
-      revealEls.forEach((el) => observer.observe(el));
-    } else {
-      // Fallback: make all visible
-      revealEls.forEach((el) => el.classList.add('is-visible'));
-    }
-  }, []);
-
-  useEffect(() => {
-    // Scroll animation for book cards
-    const bookCards = document.querySelectorAll('.book-card');
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-              setTimeout(() => {
-                entry.target.classList.add('card-visible');
-              }, index * 100);
-            }
-          });
-        },
-        {
-          threshold: 0.2,
-        }
-      );
-
-      bookCards.forEach((card) => observer.observe(card));
-    } else {
-      bookCards.forEach((card) => card.classList.add('card-visible'));
-    }
-  }, []);
-
-  useEffect(() => {
-    // Scroll animation for section headings
-    const headings = document.querySelectorAll('.section h2');
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('heading-visible');
-            }
-          });
-        },
-        {
-          threshold: 0.3,
-        }
-      );
-
-      headings.forEach((heading) => observer.observe(heading));
-    } else {
-      headings.forEach((heading) => heading.classList.add('heading-visible'));
-    }
-  }, []);
+export default async function Home() {
+  const featuredProducts = await getFeaturedProducts();
 
   return (
-    <>
-      <div className="body" data-page="home">
-        <Navbar />
-        <div className="page_wrapper">
-        {/* HERO */}
-        <header className="section_hero">
-          <div className="hero_inner">
-            <div className="hero_left">
-              <div className="hero_kicker">BESTSELLING AUTHOR · STORYTELLER</div>
-              <h1 className="hero_title">
-                Discover<br />
-                Your Next<br />
-                Great Read
-              </h1>
-              <p className="hero_subtitle">
-                Explore curated collections of bestselling books across all genres. Find your next favorite story today.
-              </p>
-              <div className="hero_cta-row">
-                <a href="#shop" className="btn btn-dark">
-                  Shop Now
-                </a>
-                <a href="#featured" className="btn btn-ghost">
-                  Featured Books
-                </a>
-              </div>
-            </div>
-
-            <div className="hero_right">
-              <div
-                ref={heroWrapperRef}
-                className="hero_image-wrap"
-                style={{ 
-                  transform: parallaxTransform,
-                  width: `${wrapperWidth}px`,
-                  transition: 'width 0.4s ease-out',
-                  maxWidth: '100%'
-                }}
-              >
-                <div className="swiper-wrapper" style={{ gridTemplateColumns: `repeat(${visibleImages}, 1fr)` }}>
-                  {heroImages.slice(0, visibleImages).map((image, index) => (
-                    <div
-                      key={index}
-                      className="swiper-slide"
-                    >
-                      <img
-                        src={image}
-                        alt={`Featured Book ${index + 1}`}
-                        className="hero_image"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="hero_badge">
-                  <div className="badge-circle"></div>
-                  <div className="badge-text">BESTSELLER</div>
+    <div>
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="relative z-10 py-12 sm:py-16 md:py-20 lg:py-28">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div className="sm:text-center lg:text-left">
+                <h1 className="text-4xl tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                  <span className="block xl:inline">Your Complete</span>{' '}
+                  <span className="block text-primary-600 xl:inline">Stationery Store</span>
+                </h1>
+                <p className="mt-3 text-base text-gray-600 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  From essential office supplies to creative stationery, we have everything you need for your work, study, and creative projects.
+                </p>
+                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
+                  <Link href="/products">
+                    <Button size="lg" className="w-full sm:w-auto">
+                      Shop Now →
+                    </Button>
+                  </Link>
+                  <Link href="/about">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                      Learn More
+                    </Button>
+                  </Link>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Scroll indicator */}
-          <div className="hero_scroll-indicator">
-            <span>Scroll</span>
-            <span className="scroll_bar"></span>
-          </div>
-        </header>
-
-        {/* Featured Books Section */}
-        <section id="featured" className="section section-light reveal-on-scroll section-with-students">
-          
-          <div className="container">
-            <h2>Featured Books</h2>
-            <div className="books-grid">
-              <div className="book-card">
-                <img src="/pexels-photo-45717.webp" alt="Book 1" />
-                <h3>The Art of Reading</h3>
-                <p className="author">By Jane Smith</p>
-                <p className="price">$24.99</p>
-                <button className="btn btn-dark">Add to Cart</button>
-              </div>
-              <div className="book-card">
-                <img src="/glasses-resting-on-stack-of-teal-books-with-mug-in-soft-natural-light-free-photo.jpeg" alt="Book 2" />
-                <h3>Journey Through Time</h3>
-                <p className="author">By John Doe</p>
-                <p className="price">$22.99</p>
-                <button className="btn btn-dark">Add to Cart</button>
-              </div>
-              <div className="book-card">
-                <img src="/gettyimages-1455958786-612x612.jpg" alt="Book 3" />
-                <h3>Whispers of Tomorrow</h3>
-                <p className="author">By Sarah Johnson</p>
-                <p className="price">$26.99</p>
-                <button className="btn btn-dark">Add to Cart</button>
-              </div>
-              <div className="book-card">
-                <img src="/download.jpeg" alt="Book 4" />
-                <h3>Echoes of the Past</h3>
-                <p className="author">By Michael Chen</p>
-                <p className="price">$23.99</p>
-                <button className="btn btn-dark">Add to Cart</button>
+              <div className="hidden lg:flex justify-center items-center">
+                <img src="/logo.jpg" alt="Radhe Stationery" className="w-full max-w-md h-auto" />
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Newsletter Section */}
-        <section id="newsletter" className="section section-dark reveal-on-scroll">
-          <div className="container">
-            <h2>Join Our Newsletter</h2>
-            <p>Get exclusive book recommendations and special offers delivered to your inbox.</p>
-            <form className="newsletter-form">
-              <input type="email" placeholder="Enter your email" required />
-              <button type="submit" className="btn btn-dark">Subscribe</button>
-            </form>
-          </div>
-        </section>
-
-        {/* Categories Section */}
-        <section id="shop" className="section section-light reveal-on-scroll section-with-students">
-         
-          <div className="container">
-            <h2>Shop by Category</h2>
-            <div className="categories-grid">
-              <div className="category-card">
-                <h3>Fiction</h3>
-                <p>Explore captivating stories and novels</p>
+      {/* Features Section */}
+      <div className="max-w-7xl mx-auto px-4 -mt-8 relative z-10 mb-16">
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
+                  ⭐
+                </div>
               </div>
-              <div className="category-card">
-                <h3>Non-Fiction</h3>
-                <p>Learn from real-world experiences</p>
+              <div className="ml-4">
+                <h3 className="text-lg text-gray-900 font-semibold">Quality Products</h3>
+                <p className="text-sm text-gray-600">Premium stationery from trusted brands</p>
               </div>
-              <div className="category-card">
-                <h3>Mystery</h3>
-                <p>Unravel thrilling mysteries</p>
+            </div>
+            
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
+                  🚚
+                </div>
               </div>
-              <div className="category-card">
-                <h3>Self-Help</h3>
-                <p>Improve yourself and your life</p>
+              <div className="ml-4">
+                <h3 className="text-lg text-gray-900 font-semibold">Fast Delivery</h3>
+                <p className="text-sm text-gray-600">Same day delivery available</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
+                  🔒
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg text-gray-900 font-semibold">Secure Shopping</h3>
+                <p className="text-sm text-gray-600">Safe and secure payment methods</p>
               </div>
             </div>
           </div>
-        </section>
         </div>
       </div>
-      <Footer />
-    </>
+
+      {/* Product Categories */}
+      <section className="py-16 bg-gray-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              Shop by Category
+            </h2>
+            <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-600">
+              Explore our wide range of stationery products for all your needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { 
+                name: 'Notebooks & Diaries', 
+                image: '/stack-of-books.png', 
+                href: '/products?category=books',
+                items: ['Notebooks', 'Diaries', 'Planners', 'Journals']
+              },
+              { 
+                name: 'Writing Instruments', 
+                image: '/stationery.png', 
+                href: '/products?category=stationery',
+                items: ['Pens', 'Pencils', 'Markers', 'Highlighters']
+              },
+              { 
+                name: 'Art & Craft', 
+                image: '/palette.png', 
+                href: '/products?category=art',
+                items: ['Color Pencils', 'Paints', 'Brushes', 'Craft Paper']
+              },
+              { 
+                name: 'Craft Supplies', 
+                image: '/paper-crafts.png', 
+                href: '/products?category=craft',
+                items: ['Paper', 'Scissors', 'Glue', 'Tape']
+              },
+              { 
+                name: 'Office Supplies', 
+                image: '/stack-of-books.png', 
+                href: '/products',
+                items: ['Files', 'Folders', 'Staplers', 'Paper Clips']
+              },
+              { 
+                name: 'School Supplies', 
+                image: '/stationery.png', 
+                href: '/products',
+                items: ['Erasers', 'Rulers', 'Geometry Box', 'School Bags']
+              },
+            ].map((cat) => (
+              <Link key={cat.name} href={cat.href}>
+                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group h-full">
+                  <div className="aspect-video relative h-48 overflow-hidden bg-gray-200">
+                    <img 
+                      src={cat.image} 
+                      alt={cat.name} 
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 p-4"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-opacity" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <h3 className="text-xl font-semibold text-white text-center px-4">
+                        {cat.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex flex-wrap gap-2">
+                      {cat.items.map((item, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-primary-100 text-primary-700"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      {featuredProducts.length > 0 && (
+        <section className="py-16 bg-white relative">
+          <div className="absolute left-0 top-0 bottom-0 w-32 pointer-events-none z-0">
+            <img src="/left-border.png" alt="" className="h-full w-full object-cover" />
+          </div>
+          <div className="absolute right-0 top-0 bottom-0 w-32 pointer-events-none z-0">
+            <img src="/right-border.png" alt="" className="h-full w-full object-cover" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                Featured Products
+              </h2>
+              <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-600">
+                Check out our latest and most popular items
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard key={String(product._id)} product={product} />
+              ))}
+            </div>
+            <div className="text-center mt-12">
+              <Link href="/products">
+                <Button size="lg">View All Products</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
   );
 }
