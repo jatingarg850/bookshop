@@ -65,12 +65,22 @@ export async function POST(req: NextRequest) {
 
     // Calculate tax with product-level rates
     const productsData = order.items.map((item: any) => ({
-      ...item,
-      priceAtPurchase: item.priceAtPurchase,
-      productId: item.productId.toString(),
+      productId: item.productId?.toString() || '',
+      priceAtPurchase: item.priceAtPurchase || 0,
+      quantity: item.quantity || 1,
+      cgst: item.cgst || 0,
+      sgst: item.sgst || 0,
+      igst: item.igst || 0,
     }));
 
     const taxCalculation = calculateOrderTax(productsData, globalTaxRate);
+
+    // Ensure tax values are valid numbers
+    const validTax = isNaN(taxCalculation.totalTax) ? 0 : taxCalculation.totalTax;
+    const validCGST = isNaN(taxCalculation.totalCGST) ? 0 : taxCalculation.totalCGST;
+    const validSGST = isNaN(taxCalculation.totalSGST) ? 0 : taxCalculation.totalSGST;
+    const validIGST = isNaN(taxCalculation.totalIGST) ? 0 : taxCalculation.totalIGST;
+    const validTotalAmount = order.subtotal + order.shippingCost + validTax;
 
     // Create Invoice
     const invoiceNumber = generateInvoiceNumber();
@@ -92,12 +102,12 @@ export async function POST(req: NextRequest) {
       })),
       subtotal: order.subtotal,
       shippingCost: order.shippingCost,
-      tax: taxCalculation.totalTax,
-      cgst: taxCalculation.totalCGST,
-      sgst: taxCalculation.totalSGST,
-      igst: taxCalculation.totalIGST,
+      tax: validTax,
+      cgst: validCGST,
+      sgst: validSGST,
+      igst: validIGST,
       taxRate: globalTaxRate,
-      totalAmount: order.subtotal + order.shippingCost + taxCalculation.totalTax,
+      totalAmount: validTotalAmount,
       shippingDetails: order.shippingDetails,
       paymentMethod: order.payment.method,
       paymentStatus: order.payment.status,
