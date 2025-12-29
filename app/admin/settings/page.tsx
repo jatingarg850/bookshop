@@ -301,14 +301,14 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="mt-6 pt-6 border-t">
-              <h3 className="font-heading text-lg font-bold mb-4">Weight-Based Shipping Rates (kg)</h3>
+              <h3 className="font-heading text-lg font-bold mb-4">Weight-Based Shipping Rates (grams)</h3>
               <div className="space-y-3 mb-4">
                 {formData.weightBasedRates.map((rate, idx) => (
                   <div key={idx} className="flex gap-3 items-end p-3 bg-gray-50 rounded-lg">
                     <Input
-                      label="Min Weight (kg)"
+                      label="Min Weight (g)"
                       type="number"
-                      step="0.1"
+                      step="1"
                       min="0"
                       value={rate.minWeight}
                       onChange={(e) => {
@@ -319,9 +319,9 @@ export default function AdminSettingsPage() {
                       className="flex-1"
                     />
                     <Input
-                      label="Max Weight (kg)"
+                      label="Max Weight (g)"
                       type="number"
-                      step="0.1"
+                      step="1"
                       min="0"
                       value={rate.maxWeight}
                       onChange={(e) => {
@@ -364,7 +364,7 @@ export default function AdminSettingsPage() {
                 onClick={() => {
                   setFormData({
                     ...formData,
-                    weightBasedRates: [...formData.weightBasedRates, { minWeight: 0, maxWeight: 1, cost: 50 }],
+                    weightBasedRates: [...formData.weightBasedRates, { minWeight: 0, maxWeight: 1000, cost: 50 }],
                   });
                 }}
               >

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated, removeAuthToken } from '../lib/auth';
-import { getProducts, saveProducts, addProduct, updateProduct, deleteProduct, getOrders, getUsers, getNewsletterSubscribers } from '../lib/db';
+import { getProducts, addProduct, updateProduct, deleteProduct, getOrders, getUsers, getNewsletterSubscribers } from '../lib/db';
 import type { Product } from '../lib/db';
 
 type TabType = 'dashboard' | 'products' | 'orders' | 'users' | 'newsletter';
@@ -12,9 +12,9 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [newsletter, setNewsletter] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [newsletter, setNewsletter] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     author: '',

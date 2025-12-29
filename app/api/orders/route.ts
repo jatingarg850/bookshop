@@ -11,6 +11,7 @@ import { checkoutSchema } from '@/lib/validations/checkout';
 import { generateInvoiceNumber } from '@/lib/utils/invoice';
 import {
   calculateOrderWeight,
+  calculateOrderWeightInGrams,
   calculateOrderVolume,
   calculateShippingCost,
   calculateOrderTax,
@@ -86,8 +87,9 @@ export async function POST(req: NextRequest) {
 
     // Calculate shipping based on weight and dimensions
     const totalWeight = calculateOrderWeight(productsData);
+    const totalWeightGrams = calculateOrderWeightInGrams(productsData);
     const totalVolume = calculateOrderVolume(productsData);
-    const shippingCost = calculateShippingCost(subtotal, totalWeight, {
+    const shippingCost = calculateShippingCost(subtotal, totalWeightGrams, {
       shippingCost: defaultShippingCost,
       freeShippingAbove: shippingThreshold,
       weightBasedRates: settings?.weightBasedRates,

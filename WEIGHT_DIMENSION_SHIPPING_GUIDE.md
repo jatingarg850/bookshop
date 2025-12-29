@@ -3,8 +3,8 @@
 ## Overview
 
 The system now supports flexible shipping cost calculation based on:
-1. **Weight-based rates** - Calculate shipping based on total order weight
-2. **Dimension-based rates** - Calculate shipping based on total order volume
+1. **Weight-based rates** - Calculate shipping based on total order weight in grams
+2. **Dimension-based rates** - Calculate shipping based on total order volume in cm³
 3. **Default flat rate** - Fallback to a fixed shipping cost
 
 ## How It Works
@@ -14,8 +14,8 @@ The system now supports flexible shipping cost calculation based on:
 The system calculates shipping costs in this order:
 
 1. **Free Shipping Check** - If order subtotal >= free shipping threshold, shipping is free
-2. **Weight-Based Rates** - If configured, uses weight-based rates
-3. **Dimension-Based Rates** - If configured, uses dimension-based rates
+2. **Weight-Based Rates** - If configured, uses weight-based rates (in grams)
+3. **Dimension-Based Rates** - If configured, uses dimension-based rates (in cm³)
 4. **Default Shipping Cost** - Falls back to the default flat rate
 
 ### Weight Calculation
@@ -23,7 +23,7 @@ The system calculates shipping costs in this order:
 - **Actual Weight**: Product weight in grams, kilograms, ounces, or pounds
 - **Volumetric Weight**: Calculated from dimensions (Length × Width × Height) / 5000
 - **Effective Weight**: Maximum of actual weight or volumetric weight
-- **Total Order Weight**: Sum of all items' effective weights × quantities
+- **Total Order Weight**: Sum of all items' effective weights × quantities (converted to grams)
 
 ### Volume Calculation
 
@@ -41,14 +41,14 @@ The system calculates shipping costs in this order:
 
 1. Click **Add Weight Rate** button
 2. Enter:
-   - **Min Weight (kg)**: Minimum weight for this rate
-   - **Max Weight (kg)**: Maximum weight for this rate
+   - **Min Weight (g)**: Minimum weight in grams for this rate
+   - **Max Weight (g)**: Maximum weight in grams for this rate
    - **Cost (₹)**: Shipping cost for this weight range
 3. Add multiple rates for different weight ranges
 4. Example:
-   - 0 kg - 1 kg: ₹50
-   - 1 kg - 5 kg: ₹100
-   - 5 kg - 10 kg: ₹150
+   - 0g - 500g: ₹50
+   - 500g - 2000g: ₹100
+   - 2000g - 5000g: ₹150
 
 ### Configure Dimension-Based Rates
 
@@ -86,11 +86,11 @@ For weight and dimension-based shipping to work, products must have:
 
 ### Scenario 1: Light Book (Weight-Based)
 - Product: Book
-- Weight: 500g (0.5 kg)
+- Weight: 500g
 - Quantity: 2
-- Total Weight: 1 kg
-- Shipping Rate: 0-1 kg = ₹50
-- **Shipping Cost: ₹50**
+- Total Weight: 1000g
+- Shipping Rate: 500g - 2000g = ₹100
+- **Shipping Cost: ₹100**
 
 ### Scenario 2: Large Box (Dimension-Based)
 - Product: Stationery Set
@@ -110,28 +110,30 @@ For weight and dimension-based shipping to work, products must have:
 ### Files Modified
 
 1. **lib/db/models/Settings.ts**
-   - Added `weightBasedRates` array
-   - Added `dimensionBasedRates` array
+   - Added `weightBasedRates` array (rates in grams)
+   - Added `dimensionBasedRates` array (rates in cm³)
 
 2. **lib/utils/shippingCalculator.ts**
+   - Added `calculateOrderWeightInGrams()` function
    - Added `calculateOrderVolume()` function
-   - Updated `calculateShippingCost()` to support dimension-based rates
+   - Updated `calculateShippingCost()` to use grams for weight-based rates
    - Updated `ShippingSettings` interface
 
 3. **app/admin/settings/page.tsx**
-   - Added UI for managing weight-based rates
-   - Added UI for managing dimension-based rates
+   - Added UI for managing weight-based rates (in grams)
+   - Added UI for managing dimension-based rates (in cm³)
 
 4. **app/api/admin/settings/route.ts**
    - Updated to save/retrieve weight and dimension rates
 
 5. **app/api/orders/route.ts**
-   - Updated to calculate volume and use dimension-based rates
+   - Updated to calculate weight in grams and volume
+   - Uses gram-based rates for shipping calculation
 
 ## Best Practices
 
 1. **Set Product Dimensions**: Always set product dimensions for accurate volumetric weight calculation
-2. **Use Consistent Units**: Use consistent units (kg for weight, cm for dimensions)
+2. **Use Consistent Units**: Use grams for weight, cm for dimensions
 3. **Test Rates**: Test shipping calculations with sample orders
 4. **Order Rates**: Arrange weight/dimension rates in ascending order for clarity
 5. **Fallback Rate**: Always set a default shipping cost as fallback
@@ -147,13 +149,14 @@ For weight and dimension-based shipping to work, products must have:
 - Verify the weight/dimension calculation matches your expectations
 - Check if multiple rates overlap
 - Ensure rates are in correct order (min to max)
+- Remember: weight is in grams, not kg
 
 ## API Integration
 
 When creating orders, the system automatically:
 1. Fetches product weight and dimension data
-2. Calculates total order weight and volume
-3. Applies appropriate shipping rate
+2. Calculates total order weight in grams and volume in cm³
+3. Applies appropriate shipping rate based on grams/volume
 4. Falls back to default rate if needed
 
 No additional configuration needed in checkout or order creation.

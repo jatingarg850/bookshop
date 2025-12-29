@@ -111,7 +111,18 @@ export function getEffectiveWeight(
 }
 
 /**
- * Calculate total order weight
+ * Calculate total order weight in grams
+ */
+export function calculateOrderWeightInGrams(items: Array<ProductItem>): number {
+  return items.reduce((total, item) => {
+    const itemWeightKg = getEffectiveWeight(item.weight, item.weightUnit, item.dimensions);
+    const itemWeightGrams = itemWeightKg * 1000; // Convert kg to grams
+    return total + itemWeightGrams * item.quantity;
+  }, 0);
+}
+
+/**
+ * Calculate total order weight (in kg, for backward compatibility)
  */
 export function calculateOrderWeight(items: Array<ProductItem>): number {
   return items.reduce((total, item) => {
@@ -148,11 +159,11 @@ export function calculateOrderVolume(items: Array<ProductItem>): number {
 }
 
 /**
- * Calculate shipping cost based on weight, dimensions, and settings
+ * Calculate shipping cost based on weight (in grams), dimensions, and settings
  */
 export function calculateShippingCost(
   subtotal: number,
-  totalWeight: number,
+  totalWeightGrams: number,
   settings: ShippingSettings,
   totalVolume?: number
 ): number {
@@ -161,16 +172,16 @@ export function calculateShippingCost(
     return 0;
   }
 
-  // If weight-based rates are configured, use them
+  // If weight-based rates are configured, use them (rates are in grams)
   if (settings.weightBasedRates && settings.weightBasedRates.length > 0) {
     for (const rate of settings.weightBasedRates) {
-      if (totalWeight >= rate.minWeight && totalWeight <= rate.maxWeight) {
+      if (totalWeightGrams >= rate.minWeight && totalWeightGrams <= rate.maxWeight) {
         return rate.cost;
       }
     }
     // If weight exceeds all ranges, use the last rate
     const lastRate = settings.weightBasedRates[settings.weightBasedRates.length - 1];
-    if (totalWeight > lastRate.maxWeight) {
+    if (totalWeightGrams > lastRate.maxWeight) {
       return lastRate.cost;
     }
   }
