@@ -280,22 +280,26 @@ export default function AdminOrderDetailPage() {
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-600">Tracking Number</p>
-                  <p className="font-mono font-bold text-lg">{delivery.trackingNumber}</p>
+                  <p className="font-mono font-bold text-lg">
+                    {delivery.trackingNumber || 'Not assigned yet'}
+                  </p>
                 </div>
-                <span className={`px-4 py-2 rounded-full font-semibold text-sm ${getStatusBadgeColor(delivery.status)}`}>
-                  {formatStatus(delivery.status)}
+                <span className={`px-4 py-2 rounded-full font-semibold text-sm ${getStatusBadgeColor(delivery.status || 'pending')}`}>
+                  {formatStatus(delivery.status || 'pending')}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-600">Carrier</p>
-                  <p className="font-semibold">{delivery.carrier}</p>
+                  <p className="font-semibold">{delivery.carrier || 'To be assigned'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Est. Delivery</p>
                   <p className="font-semibold">
-                    {new Date(delivery.estimatedDeliveryDate).toLocaleDateString()}
+                    {delivery.estimatedDeliveryDate
+                      ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString()
+                      : 'TBD'}
                   </p>
                 </div>
               </div>
@@ -358,6 +362,8 @@ function getStatusBadgeColor(status: string): string {
     case 'pending':
       return 'bg-gray-100 text-gray-700';
     case 'failed':
+      return 'bg-red-100 text-red-700';
+    case 'cancelled':
       return 'bg-red-100 text-red-700';
     default:
       return 'bg-gray-100 text-gray-700';

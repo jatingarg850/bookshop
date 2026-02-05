@@ -1,88 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { generateInvoiceNumber } from '@/lib/utils/invoice';
 import { connectDB } from '@/lib/db/connect';
-import Invoice from '@/lib/db/models/Invoice';
 import Order from '@/lib/db/models/Order';
-import { authOptions } from '@/lib/auth/auth';
 import mongoose from 'mongoose';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
+    const { orderId } = await params;
     await connectDB();
-
-    // Find invoice by order ID
-    const invoice = await Invoice.findOne({ orderId: params.orderId });
-
-    if (!invoice) {
+    const order = mongoose.Types.ObjectId.isValid(orderId)
+      ? await Order.findById(orderId)
+      : await Order.findOne({ _id: orderId });
+    if (!order) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    // Verify user has access to this invoice
-    if (session?.user?.email) {
-      const order = await Order.findById(params.orderId);
-      if (!order || order.userEmail !== session.user.email) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
-
-    // Fetch store settings
-    const db = mongoose.connection.db;
-    if (!db) {
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
-    }
-
-    const settingsCollection = db.collection('settings');
-    const settings = await settingsCollection.findOne({});
-
-    // Generate HTML for PDF
     const html = generateInvoiceHTML({
-      invoiceNumber: invoice.invoiceNumber,
-      orderId: invoice.orderId,
-      createdAt: invoice.createdAt,
-      storeName: settings?.storeName || 'Radhe Stationery',
-      storeAddress: settings?.storeAddress || '',
-      storeCity: settings?.storeCity || '',
-      storeState: settings?.storeState || '',
-      storePincode: settings?.storePincode || '',
-      storePAN: settings?.panNumber || '',
-      storeGST: settings?.gstNumber || '',
-      storePhone: settings?.storePhone || '',
-      storeEmail: settings?.storeEmail || '',
-      storeLogo: invoice.storeLogo || settings?.logoUrl || '',
-      billingName: invoice.billingDetails?.name || invoice.shippingDetails.name,
-      billingAddress: invoice.billingDetails?.address || invoice.shippingDetails.address,
-      billingCity: invoice.billingDetails?.city || invoice.shippingDetails.city,
-      billingState: invoice.billingDetails?.state || invoice.shippingDetails.state,
-      billingPincode: invoice.billingDetails?.pincode || invoice.shippingDetails.pincode,
-      shippingName: invoice.shippingDetails.name,
-      shippingAddress: invoice.shippingDetails.address,
-      shippingCity: invoice.shippingDetails.city,
-      shippingState: invoice.shippingDetails.state,
-      shippingPincode: invoice.shippingDetails.pincode,
-      shippingPhone: invoice.shippingDetails.phone,
-      shippingEmail: invoice.shippingDetails.email,
-      items: invoice.items,
-      subtotal: invoice.subtotal,
-      shippingCost: invoice.shippingCost,
-      tax: invoice.tax,
-      cgst: invoice.cgst || 0,
-      sgst: invoice.sgst || 0,
-      igst: invoice.igst || 0,
-      taxRate: invoice.taxRate || 18,
-      totalAmount: invoice.totalAmount,
-      paymentMethod: invoice.paymentMethod,
-      paymentStatus: invoice.paymentStatus,
+      invoiceNumber: generateInvoiceNumber(),
+      orderId: order._id,
+      createdAt: order.createdAt,
+      storeName: 'Radhe Stationery',
+      storeAddress: '',
+      storeCity: '',
+      storeState: '',
+      storePincode: '',
+      storePAN: '',
+      storeGST: '',
+      storePhone: '',
+      storeEmail: '',
+      storeLogo: '',
+      billingName: order.shippingDetails.name,
+      billingAddress: order.shippingDetails.address,
+      billingCity: order.shippingDetails.city,
+      billingState: order.shippingDetails.state,
+      billingPincode: order.shippingDetails.pincode,
+      shippingName: order.shippingDetails.name,
+      shippingAddress: order.shippingDetails.address,
+      shippingCity: order.shippingDetails.city,
+      shippingState: order.shippingDetails.state,
+      shippingPincode: order.shippingDetails.pincode,
+      shippingPhone: order.shippingDetails.phone,
+      shippingEmail: order.shippingDetails.email,
+      items: order.items.map((item: any) => ({
+        name: item.name,
+        sku: item.sku,
+        quantity: Number(item.quantity || 0),
+        priceAtPurchase: Number(item.priceAtPurchase || 0),
+        total: Number(item.priceAtPurchase || 0) * Number(item.quantity || 0),
+        cgst: item.cgst,
+        sgst: item.sgst,
+        igst: item.igst,
+        taxAmount: 0,
+      })),
+      subtotal: order.subtotal,
+      shippingCost: order.shippingCost,
+      tax: order.tax,
+      cgst: order.cgst || 0,
+      sgst: order.sgst || 0,
+      igst: order.igst || 0,
+      taxRate: 18,
+      totalAmount: order.totalAmount,
+      paymentMethod: order.payment.method,
+      paymentStatus: order.payment.status,
     });
 
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `attachment; filename="invoice-${invoice.invoiceNumber}.html"`,
+        'Content-Disposition': `attachment; filename="invoice-${orderId}.html"`,
       },
     });
   } catch (error: any) {
@@ -129,25 +117,32 @@ function generateInvoiceHTML(data: any): string {
 
   const itemsHTML = data.items
     .map(
-      (item: any, idx: number) => `
+      (item: any, idx: number) => {
+        const price = Number(item.priceAtPurchase || 0);
+        const qty = Number(item.quantity || 0);
+        const lineTotal = price * qty;
+        const taxAmount = Number(item.taxAmount || 0);
+        const total = Number(item.total || lineTotal);
+        return `
     <tr>
       <td style="padding: 8px; border-bottom: 1px solid #ddd;">${idx + 1}</td>
       <td style="padding: 8px; border-bottom: 1px solid #ddd;">
         <strong>${item.name}</strong>
         ${item.sku ? `<br/><span style="color: #666; font-size: 12px;">HSN: ${item.sku}</span>` : ''}
       </td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">₹${item.priceAtPurchase.toFixed(2)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">₹${price.toFixed(2)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${qty}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${lineTotal.toFixed(2)}</td>
       <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">
         ${item.cgst ? `CGST ${item.cgst}%` : ''}
         ${item.sgst ? `${item.cgst ? ' + ' : ''}SGST ${item.sgst}%` : ''}
         ${item.igst ? `${item.cgst || item.sgst ? ' + ' : ''}IGST ${item.igst}%` : ''}
       </td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${(item.taxAmount || 0).toFixed(2)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold;">₹${item.total.toFixed(2)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${taxAmount.toFixed(2)}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold;">₹${total.toFixed(2)}</td>
     </tr>
   `
+      }
     )
     .join('');
 

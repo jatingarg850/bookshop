@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/store/cartStore';
@@ -9,46 +10,82 @@ import { Card } from '@/components/ui/Card';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ReviewSection } from '@/components/products/ReviewSection';
 
-interface ProductPageProps {
-  params: { slug: string };
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
-  const [product, setProduct] = useState<any>(null);
-  const [related, setRelated] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ProductPage() {
+  const params = useParams();
+  const slug = (params?.slug as string) || '';
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [added, setAdded] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'specifications' | 'features'>('overview');
+  const [product, setProduct] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const addItem = useCartStore((state) => state.addItem);
+
+  // Fetch product + related from the Mongo-backed API.
+  useEffect(() => {
+    if (!slug) {
+      setLoading(false);
+      setProduct(null);
+      setRelated([]);
+      setError('');
+      return;
+    }
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const res = await fetch(`/api/products/${encodeURIComponent(slug)}`, {
+          signal: controller.signal,
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data?.error || `Failed to fetch product (${res.status})`);
+        }
+
+        if (cancelled) return;
+        setProduct(data?.product || null);
+        setRelated(Array.isArray(data?.related) ? data.related : []);
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return;
+        console.error(err);
+        if (!cancelled) {
+          setProduct(null);
+          setRelated([]);
+          setError(err?.message || 'Failed to load product');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [slug]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    fetchProduct();
-  }, [params.slug]);
-
-  async function fetchProduct() {
-    try {
-      const res = await fetch(`/api/products/${params.slug}`);
-      const data = await res.json();
-      setProduct(data.product);
-      setRelated(data.related);
-      if (data.product?.variations?.length > 0) {
-        setSelectedVariation(data.product.variations[0]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch product:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
+    setSelectedImage(0);
+    setQuantity(1);
+    setSelectedVariation(null);
+  }, [slug]);
 
   function handleAddToCart() {
     if (!product || !mounted) return;
@@ -69,7 +106,19 @@ export default function ProductPage({ params }: ProductPageProps) {
   }
 
   if (loading) {
-    return <div className="container-max py-12"><p className="text-center text-gray-600">Loading...</p></div>;
+    return (
+      <div className="container-max py-12">
+        <p className="text-center text-gray-600">Loading product...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container-max py-12">
+        <p className="text-center text-red-600">{error}</p>
+      </div>
+    );
   }
 
   if (!product) {
@@ -386,7 +435,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       )}
 
       {/* Reviews Section */}
-      <ReviewSection productSlug={params.slug} />
+      <ReviewSection productSlug={slug} />
     </div>
   );
 }

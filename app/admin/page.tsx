@@ -10,6 +10,12 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState<{ categories: boolean; products: boolean }>({
+    categories: false,
+    products: false,
+  });
+  const [seedMessage, setSeedMessage] = useState('');
+  const [seedError, setSeedError] = useState('');
 
   useEffect(() => {
     fetchDashboard();
@@ -30,6 +36,62 @@ export default function AdminDashboard() {
     }
   }
 
+  async function seedCategories() {
+    setSeedMessage('');
+    setSeedError('');
+    setSeeding((s) => ({ ...s, categories: true }));
+    try {
+      const res = await fetch('/api/admin/seed/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          includeCategories: true,
+          includeBase: false,
+          includeNCERT: false,
+          overwrite: false,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Seed failed (${res.status})`);
+
+      const upserted = data?.categories?.upserted ?? 0;
+      setSeedMessage(`Seeded categories (upserted: ${upserted}).`);
+      await fetchDashboard();
+    } catch (err: any) {
+      setSeedError(err?.message || 'Failed to seed categories');
+    } finally {
+      setSeeding((s) => ({ ...s, categories: false }));
+    }
+  }
+
+  async function seedProducts() {
+    setSeedMessage('');
+    setSeedError('');
+    setSeeding((s) => ({ ...s, products: true }));
+    try {
+      const res = await fetch('/api/admin/seed/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          includeCategories: true,
+          includeBase: true,
+          includeNCERT: true,
+          overwrite: false,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Seed failed (${res.status})`);
+
+      const upserted = data?.products?.upserted ?? 0;
+      setSeedMessage(`Seeded products (upserted: ${upserted}).`);
+      await fetchDashboard();
+    } catch (err: any) {
+      setSeedError(err?.message || 'Failed to seed products');
+    } finally {
+      setSeeding((s) => ({ ...s, products: false }));
+    }
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -42,6 +104,28 @@ export default function AdminDashboard() {
     <AdminLayout>
       <div>
         <h1 className="font-heading text-4xl font-bold mb-8">Dashboard</h1>
+
+        {/* Seed helpers */}
+        <Card className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h2 className="font-heading text-xl font-bold">Quick Setup</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Seed default categories and the NCERT + base product catalog into MongoDB (safe upsert).
+              </p>
+              {seedMessage && <p className="text-sm text-green-700 mt-2">✓ {seedMessage}</p>}
+              {seedError && <p className="text-sm text-red-700 mt-2">✗ {seedError}</p>}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={seedCategories} isLoading={seeding.categories}>
+                Seed Categories
+              </Button>
+              <Button onClick={seedProducts} isLoading={seeding.products}>
+                Seed Products
+              </Button>
+            </div>
+          </div>
+        </Card>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

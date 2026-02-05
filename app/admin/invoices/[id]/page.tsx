@@ -1,25 +1,26 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
+import { printHtml } from '@/lib/utils/print';
 
-interface AdminInvoicePageProps {
-  params: { id: string };
-}
-
-export default function AdminInvoicePage({ params }: AdminInvoicePageProps) {
+export default function AdminInvoicePage() {
+  const params = useParams();
+  const id = (params?.id as string) || '';
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchInvoice();
-  }, [params.id]);
+    if (!id) return;
+    fetchInvoice(id);
+  }, [id]);
 
-  async function fetchInvoice() {
+  async function fetchInvoice(invoiceId: string) {
     try {
-      const res = await fetch(`/api/admin/invoices/${params.id}`);
+      const res = await fetch(`/api/admin/invoices/${invoiceId}`);
       if (res.ok) {
         const data = await res.json();
         setInvoice(data.invoice);
@@ -32,24 +33,8 @@ export default function AdminInvoicePage({ params }: AdminInvoicePageProps) {
   }
 
   function handlePrint() {
-    if (printRef.current) {
-      const printWindow = window.open('', '', 'height=600,width=800');
-      if (printWindow) {
-        printWindow.document.write('<html><head><title>Invoice</title>');
-        printWindow.document.write('<style>');
-        printWindow.document.write('body { font-family: Arial, sans-serif; margin: 20px; }');
-        printWindow.document.write('h1 { text-align: center; }');
-        printWindow.document.write('table { width: 100%; border-collapse: collapse; margin: 20px 0; }');
-        printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
-        printWindow.document.write('th { background-color: #f2f2f2; }');
-        printWindow.document.write('.total { font-weight: bold; font-size: 16px; }');
-        printWindow.document.write('</style></head><body>');
-        printWindow.document.write(printRef.current.innerHTML);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
+    if (!printRef.current) return;
+    printHtml(printRef.current.innerHTML, 'Invoice');
   }
 
   if (loading) {

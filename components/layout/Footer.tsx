@@ -1,6 +1,27 @@
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { subscribeNewsletter } from '../../app/lib/db';
 
 export function Footer() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<string | null>(null);
+
+  const handleSubscribe = (e?: React.FormEvent) => {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    if (!email) {
+      setStatus('Please enter an email');
+      return;
+    }
+    try {
+      subscribeNewsletter(email);
+      setStatus('Subscribed — thank you!');
+      setEmail('');
+    } catch (err) {
+      setStatus('Subscription failed');
+    }
+  };
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -12,9 +33,30 @@ export function Footer() {
               Your trusted partner for all stationery needs. Quality products, affordable prices, exceptional service.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">f</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">📷</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">𝕏</a>
+              <a
+                href="https://www.facebook.com"
+                className="text-gray-400 hover:text-white transition-colors"
+                target="_blank"
+                rel="noreferrer"
+              >
+                f
+              </a>
+              <a
+                href="https://www.instagram.com"
+                className="text-gray-400 hover:text-white transition-colors"
+                target="_blank"
+                rel="noreferrer"
+              >
+                📷
+              </a>
+              <a
+                href="https://x.com"
+                className="text-gray-400 hover:text-white transition-colors"
+                target="_blank"
+                rel="noreferrer"
+              >
+                𝕏
+              </a>
             </div>
           </div>
 
@@ -111,12 +153,15 @@ export function Footer() {
                 <input
                   type="email"
                   placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-primary-500"
                 />
-                <button className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                <button onClick={handleSubscribe} className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
                   Subscribe
                 </button>
               </div>
+              {status && <p className="text-sm text-gray-400 mt-2">{status}</p>}
             </div>
           </div>
         </div>

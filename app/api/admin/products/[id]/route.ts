@@ -5,6 +5,15 @@ import Product from '@/lib/db/models/Product';
 import { authOptions } from '@/lib/auth/auth';
 import { productSchema } from '@/lib/validations/product';
 
+function makeSku(input: string) {
+  return String(input || '')
+    .toUpperCase()
+    .trim()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 64);
+}
+
 async function checkAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== 'admin') {
@@ -15,7 +24,7 @@ async function checkAdmin() {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -23,8 +32,9 @@ export async function GET(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
-    const product = await Product.findById(params.id);
+    const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -38,7 +48,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -46,12 +56,18 @@ export async function PUT(
   }
 
   try {
+    const { id } = await params;
     const body = await req.json();
+
+    // Generate a SKU if missing/blank.
+    if (!body?.sku || String(body.sku).trim() === '') {
+      body.sku = makeSku(body?.slug || body?.name || 'SKU');
+    }
     const validatedData = productSchema.parse(body);
 
     await connectDB();
 
-    const product = await Product.findByIdAndUpdate(params.id, validatedData, {
+    const product = await Product.findByIdAndUpdate(id, validatedData, {
       new: true,
     });
 
@@ -71,7 +87,7 @@ export async function PUT(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -79,11 +95,12 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params;
     const body = await req.json();
 
     await connectDB();
 
-    const product = await Product.findByIdAndUpdate(params.id, body, {
+    const product = await Product.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -104,7 +121,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -112,10 +129,11 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
 
     const product = await Product.findByIdAndUpdate(
-      params.id,
+      id,
       { status: 'inactive' },
       { new: true }
     );

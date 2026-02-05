@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+const imageUrlSchema = z
+  .string()
+  .min(1)
+  .refine((value) => value.startsWith('/') || /^https?:\/\//i.test(value), {
+    message: 'Invalid image URL',
+  });
+
 const variationSchema = z.object({
   color: z.string().optional(),
   size: z.string().optional(),
@@ -9,12 +16,19 @@ const variationSchema = z.object({
 });
 
 export const productSchema = z.object({
-  sku: z.string().optional(),
+  sku: z.string().min(1).optional(),
   name: z.string().min(1, 'Product name is required'),
   slug: z.string().min(1, 'Slug is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   category: z.string().min(1, 'Category is required'),
   subcategory: z.string().optional(),
+  // Optional catalog/education metadata (e.g. NCERT)
+  externalId: z.string().optional(),
+  board: z.string().optional(),
+  class: z.number().int().min(1).max(12).optional(),
+  subject: z.string().optional(),
+  medium: z.enum(['English', 'Hindi']).optional(),
+  inStock: z.boolean().optional(),
   price: z.number().min(0, 'Price must be positive'),
   retailPrice: z.number().min(0).optional(),
   discountPrice: z.number().min(0).optional(),
@@ -26,7 +40,7 @@ export const productSchema = z.object({
   images: z
     .array(
       z.object({
-        url: z.string().url(),
+        url: imageUrlSchema,
         alt: z.string().optional(),
       })
     )

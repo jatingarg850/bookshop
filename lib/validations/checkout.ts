@@ -12,7 +12,7 @@ export const shippingSchema = z.object({
 
 export const checkoutSchema = z.object({
   shipping: shippingSchema,
-  paymentMethod: z.enum(['razorpay', 'cod']),
+  paymentMethod: z.enum(['razorpay', 'cod', 'upi']),
 });
 
 export type ShippingInput = z.infer<typeof shippingSchema>;

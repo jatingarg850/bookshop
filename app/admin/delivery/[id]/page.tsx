@@ -1,16 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 
-interface DeliveryUpdateProps {
-  params: { id: string };
-}
-
-export default function DeliveryUpdatePage({ params }: DeliveryUpdateProps) {
+export default function DeliveryUpdatePage() {
+  const params = useParams();
+  const id = (params?.id as string) || '';
   const router = useRouter();
   const [delivery, setDelivery] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -24,12 +23,13 @@ export default function DeliveryUpdatePage({ params }: DeliveryUpdateProps) {
   });
 
   useEffect(() => {
-    fetchDelivery();
-  }, [params.id]);
+    if (!id) return;
+    fetchDelivery(id);
+  }, [id]);
 
-  async function fetchDelivery() {
+  async function fetchDelivery(deliveryId: string) {
     try {
-      const res = await fetch(`/api/admin/delivery/${params.id}`);
+      const res = await fetch(`/api/admin/delivery/${deliveryId}`);
       if (res.ok) {
         const data = await res.json();
         setDelivery(data);
@@ -53,7 +53,7 @@ export default function DeliveryUpdatePage({ params }: DeliveryUpdateProps) {
     setUpdating(true);
 
     try {
-      const res = await fetch(`/api/admin/delivery/${params.id}`, {
+      const res = await fetch(`/api/admin/delivery/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
