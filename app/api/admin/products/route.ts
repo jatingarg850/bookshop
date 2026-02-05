@@ -5,6 +5,15 @@ import Product from '@/lib/db/models/Product';
 import { authOptions } from '@/lib/auth/auth';
 import { productSchema } from '@/lib/validations/product';
 
+function makeSku(input: string) {
+  return String(input || '')
+    .toUpperCase()
+    .trim()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 64);
+}
+
 async function checkAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== 'admin') {
@@ -64,6 +73,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+
+    // Generate a SKU if missing/blank to keep admin flow smooth.
+    if (!body?.sku || String(body.sku).trim() === '') {
+      body.sku = makeSku(body?.slug || body?.name || 'SKU');
+    }
     const validatedData = productSchema.parse(body);
 
     await connectDB();

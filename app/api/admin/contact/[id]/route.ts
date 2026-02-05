@@ -14,7 +14,7 @@ async function checkAdmin() {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -22,8 +22,9 @@ export async function GET(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
-    const message = await Contact.findById(params.id);
+    const message = await Contact.findById(id);
 
     if (!message) {
       return NextResponse.json({ error: 'Message not found' }, { status: 404 });
@@ -46,7 +47,7 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -54,6 +55,7 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params;
     const body = await req.json();
     const { status } = body;
 
@@ -67,7 +69,7 @@ export async function PATCH(
     await connectDB();
 
     const message = await Contact.findByIdAndUpdate(
-      params.id,
+      id,
       { status },
       { new: true }
     );
@@ -87,7 +89,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -95,9 +97,10 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
 
-    const message = await Contact.findByIdAndDelete(params.id);
+    const message = await Contact.findByIdAndDelete(id);
 
     if (!message) {
       return NextResponse.json({ error: 'Message not found' }, { status: 404 });

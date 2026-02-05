@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ProductCard } from '@/components/products/ProductCard';
-import { connectDB } from '@/lib/db/connect';
-import Product from '@/lib/db/models/Product';
+import { products as staticProducts } from '@/data/products';
 
 interface ProductData {
   _id: string;
@@ -17,24 +16,15 @@ interface ProductData {
     alt?: string;
   }>;
   stock: number;
+  isFeatured?: boolean;
 }
 
-async function getFeaturedProducts(): Promise<ProductData[]> {
-  try {
-    await connectDB();
-    const products = await Product.find({ isActive: true })
-      .sort('-createdAt')
-      .limit(8)
-      .lean() as unknown as ProductData[];
-    return products;
-  } catch (error) {
-    console.error('Failed to fetch featured products:', error);
-    return [];
-  }
+function getFeaturedProducts(): ProductData[] {
+  return staticProducts.filter((product) => product.isFeatured).slice(0, 8) as ProductData[];
 }
 
-export default async function Home() {
-  const featuredProducts = await getFeaturedProducts();
+export default function Home() {
+  const featuredProducts = getFeaturedProducts();
 
   return (
     <div>

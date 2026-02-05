@@ -6,11 +6,22 @@ import { authOptions } from '@/lib/auth/auth';
 
 export const dynamic = 'force-dynamic';
 
+async function checkAdmin() {
+  const session = await getServerSession(authOptions);
+  const user: any = session?.user;
+  if (!user) return null;
+
+  // Prefer role-based auth, but allow legacy ADMIN_EMAIL for backward compatibility.
+  const legacyAdminEmail = process.env.ADMIN_EMAIL;
+  if (user.role === 'admin') return session;
+  if (legacyAdminEmail && user.email && user.email === legacyAdminEmail) return session;
+  return null;
+}
+
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email || session.user.email !== process.env.ADMIN_EMAIL) {
+    const session = await checkAdmin();
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

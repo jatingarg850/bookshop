@@ -14,7 +14,7 @@ async function checkAdmin() {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -22,9 +22,10 @@ export async function GET(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
 
-    const invoice = await Invoice.findById(params.id);
+    const invoice = await Invoice.findById(id);
 
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });

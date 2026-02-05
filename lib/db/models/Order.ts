@@ -27,7 +27,7 @@ export interface IOrder extends Document {
     pincode: string;
   };
   payment: {
-    method: 'razorpay' | 'cod';
+    method: 'razorpay' | 'cod' | 'upi';
     status: 'pending' | 'paid' | 'failed' | 'refunded';
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
@@ -75,6 +75,8 @@ const orderSchema = new Schema<IOrder>(
         cgst: Number,
         sgst: Number,
         igst: Number,
+        image: String,
+        slug: String,
       },
     ],
     shippingDetails: {
@@ -89,7 +91,7 @@ const orderSchema = new Schema<IOrder>(
     payment: {
       method: {
         type: String,
-        enum: ['razorpay', 'cod'],
+        enum: ['razorpay', 'cod', 'upi'],
         default: 'razorpay',
       },
       status: {

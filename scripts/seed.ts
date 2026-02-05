@@ -17,7 +17,7 @@ const sampleBooks = [
         alt: 'Mathematics for Class 10',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'English Literature - Classics Collection',
@@ -34,7 +34,7 @@ const sampleBooks = [
         alt: 'English Literature Classics',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Science Fundamentals - Physics & Chemistry',
@@ -51,7 +51,7 @@ const sampleBooks = [
         alt: 'Science Fundamentals',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'History of India - Complete Guide',
@@ -68,7 +68,7 @@ const sampleBooks = [
         alt: 'History of India',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Biology - Life Sciences',
@@ -85,7 +85,7 @@ const sampleBooks = [
         alt: 'Biology Life Sciences',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Computer Science Basics',
@@ -102,7 +102,7 @@ const sampleBooks = [
         alt: 'Computer Science Basics',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Geography - World Atlas',
@@ -119,7 +119,7 @@ const sampleBooks = [
         alt: 'Geography World Atlas',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Hindi Literature - Kavya Sangrah',
@@ -136,7 +136,7 @@ const sampleBooks = [
         alt: 'Hindi Literature',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Economics - Principles & Practice',
@@ -153,7 +153,7 @@ const sampleBooks = [
         alt: 'Economics Principles',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
   {
     name: 'Art & Design - Creative Expression',
@@ -170,7 +170,7 @@ const sampleBooks = [
         alt: 'Art and Design',
       },
     ],
-    isActive: true,
+    status: 'active',
   },
 ];
 

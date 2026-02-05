@@ -1,79 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { generateInvoiceNumber } from '@/lib/utils/invoice';
 import { connectDB } from '@/lib/db/connect';
-import Invoice from '@/lib/db/models/Invoice';
 import Order from '@/lib/db/models/Order';
-import { authOptions } from '@/lib/auth/auth';
 import mongoose from 'mongoose';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
+    const { orderId } = await params;
     await connectDB();
-
-    // Find invoice by order ID
-    const invoice = await Invoice.findOne({ orderId: params.orderId });
-
-    if (!invoice) {
+    const order = mongoose.Types.ObjectId.isValid(orderId)
+      ? await Order.findById(orderId)
+      : await Order.findOne({ _id: orderId });
+    if (!order) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    // Verify user has access to this invoice
-    if (session?.user?.email) {
-      const order = await Order.findById(params.orderId);
-      if (!order || order.userEmail !== session.user.email) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
-
-    // Fetch store settings
-    const db = mongoose.connection.db;
-    if (!db) {
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
-    }
-
-    const settingsCollection = db.collection('settings');
-    const settings = await settingsCollection.findOne({});
-
-    // Format invoice data for template
     const invoiceData = {
-      invoiceNumber: invoice.invoiceNumber,
-      orderId: invoice.orderId,
-      createdAt: invoice.createdAt,
-      storeName: settings?.storeName || 'Radhe Stationery',
-      storeAddress: settings?.storeAddress || '',
-      storeCity: settings?.storeCity || '',
-      storeState: settings?.storeState || '',
-      storePincode: settings?.storePincode || '',
-      storePAN: settings?.panNumber || '',
-      storeGST: settings?.gstNumber || '',
-      storePhone: settings?.storePhone || '',
-      storeEmail: settings?.storeEmail || '',
-      storeLogo: invoice.storeLogo || settings?.logoUrl || '',
-      billingName: invoice.billingDetails?.name || invoice.shippingDetails.name,
-      billingAddress: invoice.billingDetails?.address || invoice.shippingDetails.address,
-      billingCity: invoice.billingDetails?.city || invoice.shippingDetails.city,
-      billingState: invoice.billingDetails?.state || invoice.shippingDetails.state,
-      billingPincode: invoice.billingDetails?.pincode || invoice.shippingDetails.pincode,
-      shippingName: invoice.shippingDetails.name,
-      shippingAddress: invoice.shippingDetails.address,
-      shippingCity: invoice.shippingDetails.city,
-      shippingState: invoice.shippingDetails.state,
-      shippingPincode: invoice.shippingDetails.pincode,
-      shippingPhone: invoice.shippingDetails.phone,
-      shippingEmail: invoice.shippingDetails.email,
-      items: invoice.items,
-      subtotal: invoice.subtotal,
-      shippingCost: invoice.shippingCost,
-      tax: invoice.tax,
-      taxRate: invoice.taxRate || 18,
-      totalAmount: invoice.totalAmount,
-      paymentMethod: invoice.paymentMethod,
-      paymentStatus: invoice.paymentStatus,
+      invoiceNumber: generateInvoiceNumber(),
+      orderId: order._id,
+      createdAt: order.createdAt,
+      storeName: 'Radhe Stationery',
+      storeAddress: '',
+      storeCity: '',
+      storeState: '',
+      storePincode: '',
+      storePAN: '',
+      storeGST: '',
+      storePhone: '',
+      storeEmail: '',
+      storeLogo: '',
+      billingName: order.shippingDetails.name,
+      billingAddress: order.shippingDetails.address,
+      billingCity: order.shippingDetails.city,
+      billingState: order.shippingDetails.state,
+      billingPincode: order.shippingDetails.pincode,
+      shippingName: order.shippingDetails.name,
+      shippingAddress: order.shippingDetails.address,
+      shippingCity: order.shippingDetails.city,
+      shippingState: order.shippingDetails.state,
+      shippingPincode: order.shippingDetails.pincode,
+      shippingPhone: order.shippingDetails.phone,
+      shippingEmail: order.shippingDetails.email,
+      items: order.items.map((item) => ({
+        name: item.name,
+        sku: item.sku,
+        quantity: item.quantity,
+        priceAtPurchase: item.priceAtPurchase,
+        total: item.priceAtPurchase * item.quantity,
+        cgst: item.cgst,
+        sgst: item.sgst,
+        igst: item.igst,
+        taxAmount: 0,
+      })),
+      subtotal: order.subtotal,
+      shippingCost: order.shippingCost,
+      tax: order.tax,
+      cgst: order.cgst,
+      sgst: order.sgst,
+      igst: order.igst,
+      taxRate: 18,
+      totalAmount: order.totalAmount,
+      paymentMethod: order.payment.method,
+      paymentStatus: order.payment.status,
     };
 
     return NextResponse.json({ invoice: invoiceData });

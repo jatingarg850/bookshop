@@ -17,6 +17,13 @@ export interface IProduct extends Document {
   description: string;
   category: string;
   subcategory?: string;
+  // Optional education/catalog metadata (e.g. NCERT)
+  externalId?: string;
+  board?: string;
+  class?: number;
+  subject?: string;
+  medium?: 'English' | 'Hindi';
+  inStock?: boolean;
   price: number;
   retailPrice?: number;
   discountPrice?: number;
@@ -91,6 +98,12 @@ const productSchema = new Schema<IProduct>(
       unique: true,
       lowercase: true,
     },
+    externalId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
     description: {
       type: String,
       required: true,
@@ -101,6 +114,27 @@ const productSchema = new Schema<IProduct>(
     },
     subcategory: {
       type: String,
+    },
+    board: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+    class: {
+      type: Number,
+      min: 1,
+      max: 12,
+      index: true,
+    },
+    subject: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+    medium: {
+      type: String,
+      enum: ['English', 'Hindi'],
+      index: true,
     },
     price: {
       type: Number,
@@ -126,6 +160,11 @@ const productSchema = new Schema<IProduct>(
       required: true,
       default: 0,
       min: 0,
+    },
+    inStock: {
+      type: Boolean,
+      default: true,
+      index: true,
     },
     tags: [String],
     status: {
@@ -234,12 +273,46 @@ const productSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
+
+
+// Keep `inStock` consistent when stock is set/updated.
+productSchema.pre('save', function (next) {
+  try {
+    (this as any).inStock = Number((this as any).stock || 0) > 0;
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
+productSchema.pre('findOneAndUpdate', function (next) {
+  const update: any = this.getUpdate() || {};
+  const stock =
+    typeof update?.stock === 'number'
+      ? update.stock
+      : typeof update?.$set?.stock === 'number'
+        ? update.$set.stock
+        : null;
+
+  if (stock !== null) {
+    update.$set = update.$set || {};
+    update.$set.inStock = stock > 0;
+    this.setUpdate(update);
+  }
+
+  next();
+});
+
 productSchema.index({ category: 1 });
 productSchema.index({ subcategory: 1 });
 productSchema.index({ tags: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ brand: 1 });
 productSchema.index({ manufacturer: 1 });
+productSchema.index({ board: 1 });
+productSchema.index({ class: 1 });
+productSchema.index({ subject: 1 });
+productSchema.index({ medium: 1 });
 productSchema.index({ color: 1 });
 productSchema.index({ size: 1 });
 productSchema.index({ isFeatured: 1 });

@@ -75,22 +75,22 @@ export function Footer() {
       <section className="footer-content">
         <ul className="socials">
           <li>
-            <a href="#" className="social-link" aria-label="Facebook">
+            <a href="https://www.facebook.com" className="social-link" aria-label="Facebook" target="_blank" rel="noreferrer">
               <FaFacebook />
             </a>
           </li>
           <li>
-            <a href="#" className="social-link" aria-label="Twitter">
+            <a href="https://x.com" className="social-link" aria-label="Twitter" target="_blank" rel="noreferrer">
               <FaTwitter />
             </a>
           </li>
           <li>
-            <a href="#" className="social-link" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com" className="social-link" aria-label="LinkedIn" target="_blank" rel="noreferrer">
               <FaLinkedin />
             </a>
           </li>
           <li>
-            <a href="#" className="social-link" aria-label="Instagram">
+            <a href="https://www.instagram.com" className="social-link" aria-label="Instagram" target="_blank" rel="noreferrer">
               <FaInstagram />
             </a>
           </li>

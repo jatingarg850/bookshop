@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { printHtml } from '@/lib/utils/print';
 
-interface OrderDetailProps {
-  params: { id: string };
-}
-
-export default function OrderDetailPage({ params }: OrderDetailProps) {
+export default function OrderDetailPage() {
+  const params = useParams();
+  const orderId = (params?.id as string) || '';
   const { data: session } = useSession();
   const [order, setOrder] = useState<any>(null);
   const [delivery, setDelivery] = useState<any>(null);
@@ -20,14 +20,13 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (session?.user?.email) {
-      fetchOrder();
-    }
-  }, [session?.user?.email, params.id]);
+    if (!session?.user?.email || !orderId) return;
+    fetchOrder(orderId);
+  }, [session?.user?.email, orderId]);
 
-  async function fetchOrder() {
+  async function fetchOrder(id: string) {
     try {
-      const res = await fetch(`/api/orders/${params.id}`);
+      const res = await fetch(`/api/orders/${id}`);
       if (res.ok) {
         const data = await res.json();
         setOrder(data.order);
@@ -66,24 +65,8 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
   }
 
   function handlePrint() {
-    if (printRef.current) {
-      const printWindow = window.open('', '', 'height=600,width=800');
-      if (printWindow) {
-        printWindow.document.write('<html><head><title>Invoice</title>');
-        printWindow.document.write('<style>');
-        printWindow.document.write('body { font-family: Arial, sans-serif; margin: 20px; }');
-        printWindow.document.write('h1 { text-align: center; }');
-        printWindow.document.write('table { width: 100%; border-collapse: collapse; margin: 20px 0; }');
-        printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
-        printWindow.document.write('th { background-color: #f2f2f2; }');
-        printWindow.document.write('.total { font-weight: bold; font-size: 16px; }');
-        printWindow.document.write('</style></head><body>');
-        printWindow.document.write(printRef.current.innerHTML);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
+    if (!printRef.current) return;
+    printHtml(printRef.current.innerHTML, 'Invoice');
   }
 
   if (loading) {
@@ -177,28 +160,32 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
             <Card className="mt-6">
               <h2 className="font-heading text-xl font-bold mb-4">Delivery Status</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-gray-600">Tracking Number</p>
-                    <p className="font-mono font-bold text-lg">{delivery.trackingNumber}</p>
-                  </div>
-                  <span className={`px-4 py-2 rounded-full font-semibold text-sm ${getStatusBadgeColor(delivery.status)}`}>
-                    {formatStatus(delivery.status)}
-                  </span>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600">Tracking Number</p>
+                  <p className="font-mono font-bold text-lg">
+                    {delivery.trackingNumber || 'Not assigned yet'}
+                  </p>
                 </div>
+                <span className={`px-4 py-2 rounded-full font-semibold text-sm ${getStatusBadgeColor(delivery.status || 'pending')}`}>
+                  {formatStatus(delivery.status || 'pending')}
+                </span>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Carrier</p>
-                    <p className="font-semibold">{delivery.carrier}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Est. Delivery</p>
-                    <p className="font-semibold">
-                      {new Date(delivery.estimatedDeliveryDate).toLocaleDateString()}
-                    </p>
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Carrier</p>
+                  <p className="font-semibold">{delivery.carrier || 'To be assigned'}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-600">Est. Delivery</p>
+                  <p className="font-semibold">
+                    {delivery.estimatedDeliveryDate
+                      ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString()
+                      : 'TBD'}
+                  </p>
+                </div>
+              </div>
 
                 {delivery.actualDeliveryDate && (
                   <div>
@@ -216,12 +203,12 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                   </div>
                 )}
 
-                {delivery.notes && (
-                  <div>
-                    <p className="text-sm text-gray-600">Latest Update</p>
-                    <p className="font-semibold">{delivery.notes}</p>
-                  </div>
-                )}
+              {delivery.notes && (
+                <div>
+                  <p className="text-sm text-gray-600">Latest Update</p>
+                  <p className="font-semibold">{delivery.notes}</p>
+                </div>
+              )}
               </div>
             </Card>
           )}
@@ -375,6 +362,8 @@ function getStatusBadgeColor(status: string): string {
     case 'pending':
       return 'bg-gray-100 text-gray-700';
     case 'failed':
+      return 'bg-red-100 text-red-700';
+    case 'cancelled':
       return 'bg-red-100 text-red-700';
     default:
       return 'bg-gray-100 text-gray-700';

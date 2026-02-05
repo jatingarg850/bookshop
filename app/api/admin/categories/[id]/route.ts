@@ -14,7 +14,7 @@ async function checkAdmin() {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -22,13 +22,14 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params;
     const body = await req.json();
     const { name, slug, description, icon, isActive, parentId } = body;
 
     await connectDB();
 
     const category = await Category.findByIdAndUpdate(
-      params.id,
+      id,
       {
         ...(name && { name }),
         ...(slug && { slug: slug.toLowerCase().trim() }),
@@ -56,7 +57,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -64,10 +65,11 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
 
     const category = await Category.findByIdAndUpdate(
-      params.id,
+      id,
       { isActive: false },
       { new: true }
     );

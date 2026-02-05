@@ -14,7 +14,7 @@ async function checkAdmin() {
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -22,9 +22,10 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
 
-    const review = await Review.findByIdAndDelete(params.id);
+    const review = await Review.findByIdAndDelete(id);
 
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });

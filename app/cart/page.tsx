@@ -52,6 +52,7 @@ export default function CartPage() {
         const detailsMap: any = {};
         data.products.forEach((product: any) => {
           detailsMap[product._id] = product;
+          if (product.externalId) detailsMap[product.externalId] = product;
         });
 
         // Calculate tax breakdown with product-level rates

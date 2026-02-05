@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,6 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await req.json();
     const { name, phone, address, city, state, pincode, isDefault } = body;
 
@@ -26,7 +27,7 @@ export async function PATCH(
     }
 
     const addressIndex = user.addresses.findIndex(
-      (addr: any) => addr._id.toString() === params.id
+      (addr: any) => addr._id.toString() === id
     );
 
     if (addressIndex === -1) {
@@ -47,7 +48,7 @@ export async function PATCH(
         addr.isDefault = false;
       });
       user.addresses[addressIndex].isDefault = true;
-      user.defaultAddressId = new mongoose.Types.ObjectId(params.id);
+      user.defaultAddressId = new mongoose.Types.ObjectId(id);
     }
 
     await user.save();
@@ -61,7 +62,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -69,6 +70,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await connectDB();
     const user = await User.findOne({ email: session.user.email });
 
@@ -77,7 +79,7 @@ export async function DELETE(
     }
 
     const addressIndex = user.addresses.findIndex(
-      (addr: any) => addr._id.toString() === params.id
+      (addr: any) => addr._id.toString() === id
     );
 
     if (addressIndex === -1) {
@@ -87,7 +89,7 @@ export async function DELETE(
     user.addresses.splice(addressIndex, 1);
 
     // If deleted address was default, set first address as default
-    if (user.addresses.length > 0 && user.defaultAddressId?.toString() === params.id) {
+    if (user.addresses.length > 0 && user.defaultAddressId?.toString() === id) {
       user.addresses[0].isDefault = true;
       user.defaultAddressId = user.addresses[0]._id;
     } else if (user.addresses.length === 0) {

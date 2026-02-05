@@ -14,7 +14,7 @@ async function checkAdmin() {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -22,12 +22,13 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params;
     const { role } = await req.json();
 
     await connectDB();
 
     const user = await User.findByIdAndUpdate(
-      params.id,
+      id,
       { role },
       { new: true }
     ).select('-password');
@@ -44,7 +45,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await checkAdmin();
   if (!session) {
@@ -52,9 +53,10 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params;
     await connectDB();
 
-    const user = await User.findByIdAndDelete(params.id);
+    const user = await User.findByIdAndDelete(id);
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

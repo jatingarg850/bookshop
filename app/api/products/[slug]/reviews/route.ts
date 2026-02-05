@@ -1,33 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { connectDB } from '@/lib/db/connect';
-import Review from '@/lib/db/models/Review';
-import Product from '@/lib/db/models/Product';
-import { authOptions } from '@/lib/auth/auth';
+import { products as staticProducts } from '@/data/products';
+import { addMockReview, listMockReviews } from '@/lib/mockReviewStore';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    await connectDB();
+    const { slug } = await params;
 
-    const product = await Product.findOne({ slug: params.slug });
+    const product = staticProducts.find((p: any) => p.slug === slug);
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const reviews = await Review.find({
-      productId: product._id,
-      isApproved: true,
-    })
-      .sort('-createdAt')
-      .lean();
-
+    const reviews = listMockReviews(slug);
     const avgRating =
       reviews.length > 0
-        ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-        : 0;
+        ? (
+            reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) /
+            reviews.length
+          ).toFixed(1)
+        : '0';
 
     return NextResponse.json({
       reviews,
@@ -41,29 +35,31 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const body = await req.json();
-    const session = await getServerSession(authOptions);
+    const { slug } = await params;
 
-    await connectDB();
-
-    const product = await Product.findOne({ slug: params.slug });
+    const product = staticProducts.find((p: any) => p.slug === slug);
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const review = await Review.create({
-      productId: product._id,
-      userEmail: session?.user?.email,
-      guestName: !session ? body.guestName : undefined,
-      guestEmail: !session ? body.guestEmail : undefined,
-      rating: body.rating,
-      title: body.title,
-      comment: body.comment,
+    const body = await req.json();
+
+    const review = {
+      _id: `rev_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+      productSlug: slug,
+      rating: Number(body?.rating || 0),
+      title: String(body?.title || ''),
+      comment: String(body?.comment || ''),
+      guestName: body?.guestName ? String(body.guestName) : undefined,
+      guestEmail: body?.guestEmail ? String(body.guestEmail) : undefined,
       isApproved: true,
-    });
+      createdAt: new Date().toISOString(),
+    };
+
+        addMockReview(slug, review);
 
     return NextResponse.json(review, { status: 201 });
   } catch (error: any) {

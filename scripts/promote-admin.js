@@ -1,0 +1,62 @@
+/* eslint-disable no-console */
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+// Load env vars (prefer .env.local for Next.js apps, fallback to .env)
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI is not set. Add it to .env.local or .env');
+  process.exit(1);
+}
+
+const email = process.argv[2];
+
+if (!email) {
+  console.error('Usage: node scripts/promote-admin.js <email>');
+  process.exit(1);
+}
+
+async function main() {
+  await mongoose.connect(MONGODB_URI);
+
+  // Minimal model for updating role.
+  const User =
+    mongoose.models.User ||
+    mongoose.model(
+      'User',
+      new mongoose.Schema(
+        { email: String, role: String },
+        { timestamps: true, strict: false }
+      )
+    );
+
+  const user = await User.findOneAndUpdate(
+    { email: String(email).toLowerCase().trim() },
+    { $set: { role: 'admin' } },
+    { new: true }
+  );
+
+  if (!user) {
+    console.error(`User not found: ${email}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  console.log(`✓ Promoted to admin: ${user.email}`);
+}
+
+main()
+  .catch((err) => {
+    console.error('Failed to promote admin:', err?.message || err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    try {
+      await mongoose.disconnect();
+    } catch {}
+  });
+

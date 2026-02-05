@@ -36,7 +36,7 @@ export default function CheckoutPage() {
   // All hooks must be declared at the top level BEFORE any conditional returns
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay');
+  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod' | 'upi'>('razorpay');
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [useNewAddress, setUseNewAddress] = useState(true);
@@ -67,6 +67,7 @@ export default function CheckoutPage() {
         const detailsMap: any = {};
         data.products.forEach((product: any) => {
           detailsMap[product._id] = product;
+          if (product.externalId) detailsMap[product.externalId] = product;
         });
 
         // Calculate tax breakdown with product-level rates
@@ -120,10 +121,12 @@ export default function CheckoutPage() {
         const data = await res.json();
         setSettings(data);
         // Set default payment method based on enabled methods
-        if (data.enableRazorpay) {
-          setPaymentMethod('razorpay');
-        } else if (data.enableCOD) {
+        if (data.enableCOD) {
           setPaymentMethod('cod');
+        } else if (data.enableRazorpay) {
+          setPaymentMethod('razorpay');
+        } else if (data.enableUPI) {
+          setPaymentMethod('upi');
         }
       }
     } catch (error) {
@@ -205,6 +208,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (paymentMethod === 'upi' && !settings?.enableUPI) {
+      setError('UPI payment is not available');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Create order
       const orderRes = await fetch('/api/orders', {
@@ -217,11 +226,10 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!orderRes.ok) {
-        throw new Error('Failed to create order');
-      }
-
       const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData?.error || 'Failed to create order');
+      }
       const orderId = orderData.orderId;
 
       if (paymentMethod === 'razorpay') {
@@ -236,6 +244,9 @@ export default function CheckoutPage() {
         });
 
         const paymentData = await paymentRes.json();
+        if (!paymentRes.ok) {
+          throw new Error(paymentData?.error || 'Failed to create payment order');
+        }
 
         // Load Razorpay script
         const script = document.createElement('script');
@@ -452,7 +463,7 @@ export default function CheckoutPage() {
                           name="payment"
                           value="razorpay"
                           checked={paymentMethod === 'razorpay'}
-                          onChange={(e) => setPaymentMethod(e.target.value as 'razorpay' | 'cod')}
+                          onChange={(e) => setPaymentMethod(e.target.value as 'razorpay' | 'cod' | 'upi')}
                         />
                         <span className="font-semibold">Razorpay (Card, UPI, Wallet)</span>
                       </label>
@@ -464,9 +475,23 @@ export default function CheckoutPage() {
                           name="payment"
                           value="cod"
                           checked={paymentMethod === 'cod'}
-                          onChange={(e) => setPaymentMethod(e.target.value as 'razorpay' | 'cod')}
+                          onChange={(e) => setPaymentMethod(e.target.value as 'razorpay' | 'cod' | 'upi')}
                         />
                         <span className="font-semibold">Cash on Delivery</span>
+                      </label>
+                    )}
+                    {settings?.enableUPI && (
+                      <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="upi"
+                          checked={paymentMethod === 'upi'}
+                          onChange={(e) => setPaymentMethod(e.target.value as 'razorpay' | 'cod' | 'upi')}
+                        />
+                        <span className="font-semibold">
+                          UPI (Manual Transfer{settings?.upiId ? `: ${settings.upiId}` : ''})
+                        </span>
                       </label>
                     )}
                   </div>

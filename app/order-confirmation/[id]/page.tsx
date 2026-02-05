@@ -1,28 +1,29 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { InvoiceTemplate } from '@/components/invoice/InvoiceTemplate';
+import { printHtml } from '@/lib/utils/print';
 
-interface OrderConfirmationProps {
-  params: { id: string };
-}
-
-export default function OrderConfirmationPage({ params }: OrderConfirmationProps) {
+export default function OrderConfirmationPage() {
+  const params = useParams();
+  const id = (params?.id as string) || '';
   const [order, setOrder] = useState<any>(null);
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchOrder();
-  }, [params.id]);
+    if (!id) return;
+    fetchOrder(id);
+  }, [id]);
 
-  async function fetchOrder() {
+  async function fetchOrder(orderId: string) {
     try {
-      const res = await fetch(`/api/orders/${params.id}`);
+      const res = await fetch(`/api/orders/${orderId}`);
       if (res.ok) {
         const data = await res.json();
         setOrder(data.order);
@@ -48,24 +49,8 @@ export default function OrderConfirmationPage({ params }: OrderConfirmationProps
   }
 
   function handlePrint() {
-    if (printRef.current) {
-      const printWindow = window.open('', '', 'height=600,width=800');
-      if (printWindow) {
-        printWindow.document.write('<html><head><title>Invoice</title>');
-        printWindow.document.write('<style>');
-        printWindow.document.write('body { font-family: Arial, sans-serif; margin: 20px; }');
-        printWindow.document.write('h1 { text-align: center; }');
-        printWindow.document.write('table { width: 100%; border-collapse: collapse; margin: 20px 0; }');
-        printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
-        printWindow.document.write('th { background-color: #f2f2f2; }');
-        printWindow.document.write('.total { font-weight: bold; font-size: 16px; }');
-        printWindow.document.write('</style></head><body>');
-        printWindow.document.write(printRef.current.innerHTML);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
+    if (!printRef.current) return;
+    printHtml(printRef.current.innerHTML, 'Invoice');
   }
 
   if (loading) {
@@ -131,7 +116,7 @@ export default function OrderConfirmationPage({ params }: OrderConfirmationProps
                     🖨️ Print Invoice
                   </Button>
                   <Button 
-                    onClick={() => window.open(`/api/invoices/${params.id}/download`, '_blank')}
+                    onClick={() => window.open(`/api/invoices/${id}/download`, '_blank')}
                     variant="outline"
                   >
                     📥 Download Invoice
