@@ -23,6 +23,7 @@ export default function AdminOrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [loadingRates, setLoadingRates] = useState(false);
+  const [rateError, setRateError] = useState<string | null>(null);
   const [selectedCourier, setSelectedCourier] = useState<number | null>(null);
   const [shipping, setShipping] = useState(false);
 
@@ -63,23 +64,74 @@ export default function AdminOrderDetailPage() {
   async function fetchShippingRates(order: any) {
     try {
       setLoadingRates(true);
+      setRateError(null);
+      
+      const weight = calculateWeight(order.items);
+      const pickup_postcode = process.env.NEXT_PUBLIC_STORE_PINCODE || '110001';
+      const delivery_postcode = order.shippingDetails.pincode;
+      
+      console.log('Calculating shipping rates:', {
+        weight,
+        pickup_postcode,
+        delivery_postcode,
+        payment_method: order.payment.method,
+        total_items: order.items.length,
+      });
+
+      if (!weight || weight <= 0) {
+        setRateError(`Invalid weight calculated: ${weight}. Please check order items.`);
+        console.error('Invalid weight:', weight);
+        return;
+      }
+
+      if (!delivery_postcode || delivery_postcode.length !== 6) {
+        setRateError(`Invalid delivery pincode: ${delivery_postcode}. Must be 6 digits.`);
+        console.error('Invalid pincode:', delivery_postcode);
+        return;
+      }
+
+      const payload = {
+        pickup_postcode,
+        delivery_postcode,
+        weight,
+        cod: order.payment.method === 'cod' ? 1 : 0,
+      };
+
+      console.log('Requesting shipping rates with payload:', payload);
+
       const res = await fetch('/api/shiprocket/shipping-rates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pickup_postcode: process.env.NEXT_PUBLIC_STORE_PINCODE || '110001',
-          delivery_postcode: order.shippingDetails.pincode,
-          weight: calculateWeight(order.items),
-          cod: order.payment.method === 'cod' ? 1 : 0,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         const data = await res.json();
-        setShippingRates(data.rates || []);
+        console.log('Received shipping rates:', data);
+        
+        if (data.rates && data.rates.length > 0) {
+          setShippingRates(data.rates);
+        } else {
+          setRateError(data.warning || 'No shipping rates available for this location.');
+          console.warn('No rates in response:', data);
+        }
+      } else {
+        try {
+          const errorData = await res.json();
+          const errorMsg = errorData?.error || errorData?.message || 'Failed to fetch shipping rates';
+          setRateError(errorMsg);
+          if (typeof errorData === 'object' && errorData !== null) {
+            console.error('API error response:', errorData);
+          }
+        } catch (parseError) {
+          console.error('Failed to parse error response');
+          setRateError('Server error: Invalid response format');
+        }
       }
-    } catch (error) {
-      console.error('Failed to fetch shipping rates:', error);
+    } catch (error: any) {
+      const errorMsg = error.message || 'Failed to fetch shipping rates';
+      setRateError(errorMsg);
+      console.error('Fetch error:', error);
     } finally {
       setLoadingRates(false);
     }
@@ -236,9 +288,31 @@ export default function AdminOrderDetailPage() {
             <h2 className="font-semibold text-lg mb-4">Ship Order</h2>
 
             {loadingRates ? (
-              <p className="text-gray-600">Loading shipping rates...</p>
+              <div className="flex items-center space-x-2 text-gray-600">
+                <div className="animate-spin">⏳</div>
+                <p>Loading shipping rates...</p>
+              </div>
+            ) : rateError ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <p className="text-red-700 font-semibold">⚠️ Unable to fetch shipping rates</p>
+                <p className="text-red-600 text-sm mt-1">{rateError}</p>
+                <p className="text-red-600 text-xs mt-2">
+                  <strong>Debug info:</strong> Check browser console (F12) for detailed logs. Verify:
+                </p>
+                <ul className="text-red-600 text-xs mt-1 ml-4 list-disc">
+                  <li>Delivery pincode is valid (6 digits): {order.shippingDetails.pincode}</li>
+                  <li>Pickup location ID is set: {process.env.NEXT_PUBLIC_STORE_PINCODE || '110001'}</li>
+                  <li>Shiprocket credentials are correct in .env.local</li>
+                  <li>Server logs show authentication succeeded</li>
+                </ul>
+              </div>
             ) : shippingRates.length === 0 ? (
-              <p className="text-gray-600">No shipping rates available</p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-700 font-semibold">⚠️ No shipping rates available</p>
+                <p className="text-yellow-600 text-sm mt-1">
+                  This may mean Shiprocket doesn't service the delivery location.
+                </p>
+              </div>
             ) : (
               <>
                 <div className="space-y-3 mb-4">
@@ -345,8 +419,27 @@ export default function AdminOrderDetailPage() {
 }
 
 function calculateWeight(items: any[]): number {
+  if (!items || items.length === 0) return 0;
+  
+  // Use item weight if available, otherwise default to 0.5kg per item
   const defaultWeightPerItem = 0.5;
-  return items.reduce((total, item) => total + item.quantity * defaultWeightPerItem, 0);
+  const totalWeight = items.reduce((total, item) => {
+    const itemWeight = item.weight || defaultWeightPerItem;
+    return total + itemWeight * item.quantity;
+  }, 0);
+
+  console.log('Weight Calculation:', {
+    items_count: items.length,
+    total_weight: totalWeight,
+    items_details: items.map(i => ({
+      name: i.name,
+      qty: i.quantity,
+      weight: i.weight || defaultWeightPerItem,
+      total: (i.weight || defaultWeightPerItem) * i.quantity,
+    })),
+  });
+
+  return totalWeight;
 }
 
 function getStatusBadgeColor(status: string): string {

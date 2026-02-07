@@ -130,6 +130,7 @@ class ShiprocketClient {
 
   async authenticate(): Promise<void> {
     try {
+      console.log('Authenticating with Shiprocket...');
       const response = await axios.post<ShiprocketAuthResponse>(
         `${SHIPROCKET_API_BASE}/auth/login`,
         {
@@ -139,20 +140,32 @@ class ShiprocketClient {
       );
       this.token = response.data.token;
       this.client.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-    } catch (error) {
-      console.error('Shiprocket authentication failed:', error);
-      throw new Error('Failed to authenticate with Shiprocket');
+      console.log('Shiprocket authentication successful');
+    } catch (error: any) {
+      console.error('Shiprocket authentication failed:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      throw new Error(`Shiprocket authentication failed: ${error.response?.data?.message || error.message}`);
     }
   }
 
   async getShippingRates(request: ShippingRateRequest): Promise<ShippingRateResponse> {
     try {
+      console.log('Fetching shipping rates with params:', request);
       const response = await this.client.get<ShippingRateResponse>('/courier/courierListWithRate', {
         params: request,
       });
+      console.log('Shipping rates response:', response.data);
       return response.data;
-    } catch (error) {
-      console.error('Failed to get shipping rates:', error);
+    } catch (error: any) {
+      console.error('Failed to get shipping rates:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        params: error.config?.params,
+      });
       throw error;
     }
   }
