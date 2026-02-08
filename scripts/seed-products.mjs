@@ -33,7 +33,7 @@ async function loadData() {
   const ncert = await import('../data/ncertCatalog.js');
   return {
     baseProducts: base.baseProducts || [],
-    ncertCatalog: ncert.ncertCatalog || [],
+    ncertProducts: ncert.ncertProducts || [], // Use ncertProducts instead of ncertCatalog
   };
 }
 
@@ -52,7 +52,7 @@ async function seed() {
       { $set: { status: 'active' } }
     );
 
-    const { baseProducts, ncertCatalog } = await loadData();
+    const { baseProducts, ncertProducts } = await loadData();
 
     const docs = [];
 
@@ -75,48 +75,68 @@ async function seed() {
         inStock: typeof p.inStock === 'boolean' ? p.inStock : (p.stock ?? 0) > 0,
         status: p.status || 'active',
         tags: p.tags || [],
-        images: p.images || [{ url: '/stack-of-books.png', alt: p.name }],
+        images: p.images || [{ url: '/fallback-book.svg', alt: p.name }],
         brand: p.brand,
         rating: p.rating,
         reviewCount: p.reviewCount,
         isFeatured: !!p.isFeatured,
         isNewArrival: !!p.isNewArrival,
         isBestSeller: !!p.isBestSeller,
+        hsn: p.hsn,
+        weight: p.weight,
+        weightUnit: p.weightUnit,
+        countryOfOrigin: p.countryOfOrigin,
+        manufacturer: p.manufacturer,
+        quantityPerItem: p.quantityPerItem,
+        unit: p.unit,
       });
     }
 
-    for (const b of ncertCatalog) {
-      const externalId = String(b.id);
-      const name = String(b.title);
-      const slug = slugify(`${b.board}-class-${b.class}-${b.subject}-${b.medium}`);
+    // Use ncertProducts which already has proper images and metadata
+    for (const p of ncertProducts) {
+      const externalId = String(p.id || p._id);
+      const slug = p.slug || slugify(p.name);
+      const sku = makeSku(externalId);
 
       docs.push({
         externalId,
-        sku: makeSku(externalId),
-        name,
+        sku,
+        name: p.name,
         slug,
-        description: `NCERT textbook for Class ${b.class} (${b.medium} medium) - ${b.subject}.`,
-        category: 'Books',
-        price: Number(b.price || 0),
-        stock: b.inStock ? 100 : 0,
-        inStock: !!b.inStock,
-        status: 'active',
-        tags: ['ncert', `class-${b.class}`, slugify(b.subject), String(b.medium).toLowerCase()],
-        images: [{ url: '/stack-of-books.png', alt: name }],
-        board: b.board,
-        class: b.class,
-        subject: b.subject,
-        medium: b.medium,
-        isFeatured: false,
-        isNewArrival: false,
-        isBestSeller: false,
+        description: p.description,
+        category: p.category || 'Books',
+        price: Number(p.price || 0),
+        retailPrice: p.retailPrice,
+        discountPrice: p.discountPrice,
+        stock: typeof p.stock === 'number' ? p.stock : 100,
+        inStock: typeof p.inStock === 'boolean' ? p.inStock : true,
+        status: p.status || 'active',
+        tags: p.tags || [],
+        images: p.images || [{ url: '/fallback-book.svg', alt: p.name }],
+        brand: p.brand,
+        board: p.board,
+        class: p.class,
+        subject: p.subject,
+        medium: p.medium,
+        rating: p.rating || 4.5,
+        reviewCount: p.reviewCount || 0,
+        isFeatured: !!p.isFeatured,
+        isNewArrival: !!p.isNewArrival,
+        isBestSeller: !!p.isBestSeller,
+        hsn: p.hsn,
+        weight: p.weight,
+        weightUnit: p.weightUnit,
+        countryOfOrigin: p.countryOfOrigin,
+        manufacturer: p.manufacturer,
+        quantityPerItem: p.quantityPerItem,
+        unit: p.unit,
       });
     }
 
     const ops = docs.map((d) => ({
       updateOne: {
         filter: { $or: [{ externalId: d.externalId }, { slug: d.slug }] },
-        update: { $setOnInsert: d },
+        update: { $set: d }, // Use $set to update existing products
         upsert: true,
       },
     }));
@@ -124,8 +144,9 @@ async function seed() {
     const result = ops.length ? await Product.bulkWrite(ops, { ordered: false }) : null;
     const upserted = result?.upsertedCount || 0;
     const matched = result?.matchedCount || 0;
+    const modified = result?.modifiedCount || 0;
 
-    console.log(`✓ Seed complete. Upserted: ${upserted}, Matched: ${matched}`);
+    console.log(`✓ Seed complete. Upserted: ${upserted}, Matched: ${matched}, Modified: ${modified}`);
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {

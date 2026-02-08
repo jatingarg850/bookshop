@@ -54,14 +54,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (typeof product.stock === 'number' && product.stock < item.quantity) {
+      if (typeof (product as any).stock === 'number' && (product as any).stock < item.quantity) {
         return NextResponse.json(
-          { error: `Insufficient stock for ${product.name}` },
+          { error: `Insufficient stock for ${(product as any).name}` },
           { status: 400 }
         );
       }
 
-      const price = product.discountPrice || product.price;
+      const price = (product as any).discountPrice || (product as any).price;
       subtotal += price * item.quantity;
 
       const orderItem = {

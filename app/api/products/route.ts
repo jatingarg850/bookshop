@@ -151,7 +151,11 @@ export async function GET(req: NextRequest) {
     }
 
     const { field, dir } = resolveSort(sortRaw);
-    const sort: any = { isFeatured: -1 };
+    const sort: any = { 
+      isFeatured: -1,
+      // Prioritize products with images
+      'images.0': -1  // Products with at least one image come first
+    };
     sort[field] = dir;
     if (field !== 'createdAt') sort.createdAt = -1;
 

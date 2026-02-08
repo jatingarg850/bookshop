@@ -44,7 +44,7 @@ export async function GET(
       shippingPincode: order.shippingDetails.pincode,
       shippingPhone: order.shippingDetails.phone,
       shippingEmail: order.shippingDetails.email,
-      items: order.items.map((item) => ({
+      items: order.items.map((item: any) => ({
         name: item.name,
         sku: item.sku,
         quantity: item.quantity,
