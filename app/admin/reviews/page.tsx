@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Pagination } from '@/components/ui/Pagination';
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -103,33 +104,11 @@ export default function AdminReviewsPage() {
             ))}
           </div>
 
-          {pages > 1 && (
-            <div className="flex justify-center gap-2">
-              <Button
-                variant="outline"
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
-                Previous
-              </Button>
-              {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-                <Button
-                  key={p}
-                  variant={page === p ? 'primary' : 'outline'}
-                  onClick={() => setPage(p)}
-                >
-                  {p}
-                </Button>
-              ))}
-              <Button
-                variant="outline"
-                disabled={page === pages}
-                onClick={() => setPage(page + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+          <Pagination
+            currentPage={page}
+            totalPages={pages}
+            onPageChange={setPage}
+          />
         </>
       )}
     </AdminLayout>

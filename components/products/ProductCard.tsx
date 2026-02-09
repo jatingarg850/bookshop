@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -31,13 +33,38 @@ export function ProductCard({ product }: ProductCardProps) {
     ? Math.round(((product.price - product.discountPrice!) / product.price) * 100)
     : 0;
 
+  // Check if product has images
+  const hasImages = product.images && product.images.length > 0;
+  const imageUrl = hasImages ? product.images[0].url : null;
+  const imageAlt = hasImages ? (product.images[0].alt || product.name) : product.name;
+
+  // Debug logging
+  console.log('ProductCard:', {
+    name: product.name,
+    hasImages,
+    imageUrl,
+    imagesArray: product.images
+  });
+
   return (
     <Link href={`/products/${product.slug}`}>
       <div className="bg-white rounded-xl shadow-soft overflow-hidden hover:shadow-soft-lg transition-all duration-300 h-full flex flex-col hover:-translate-y-1">
         <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
-          {product.images[0] && (
-            <Image src={product.images[0].url} alt={product.images[0].alt || product.name}
-              fill className="object-cover hover:scale-105 transition-transform duration-300" />
+          {imageUrl ? (
+            <Image 
+              src={imageUrl} 
+              alt={imageAlt}
+              fill 
+              className="object-cover hover:scale-105 transition-transform duration-300"
+              unoptimized
+            />
+          ) : (
+            // Text-only placeholder for products without authentic covers
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+              <div className="text-4xl mb-2">📚</div>
+              <p className="text-sm font-semibold text-gray-700">{product.name}</p>
+              <p className="text-xs text-gray-500 mt-2">Cover Image Coming Soon</p>
+            </div>
           )}
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1">

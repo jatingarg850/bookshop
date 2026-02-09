@@ -118,23 +118,19 @@ const productSchema = new Schema<IProduct>(
     board: {
       type: String,
       trim: true,
-      index: true,
     },
     class: {
       type: Number,
       min: 1,
       max: 12,
-      index: true,
     },
     subject: {
       type: String,
       trim: true,
-      index: true,
     },
     medium: {
       type: String,
       enum: ['English', 'Hindi'],
-      index: true,
     },
     price: {
       type: Number,

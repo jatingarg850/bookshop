@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { Pagination } from '@/components/ui/Pagination';
 
 interface ContactMessage {
   _id: string;
@@ -208,41 +209,13 @@ export default function AdminContactPage() {
             )}
 
             {/* Pagination */}
-            {pagination.pages > 1 && (
-              <div className="mt-6 flex justify-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={pagination.page === 1}
-                  onClick={() => fetchMessages(pagination.page - 1)}
-                >
-                  Previous
-                </Button>
-                <div className="flex items-center gap-2">
-                  {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => fetchMessages(page)}
-                      className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${
-                        pagination.page === page
-                          ? 'bg-primary-600 text-white'
-                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={pagination.page === pagination.pages}
-                  onClick={() => fetchMessages(pagination.page + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            )}
+            <div className="mt-6">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.pages}
+                onPageChange={fetchMessages}
+              />
+            </div>
           </Card>
         </div>
 

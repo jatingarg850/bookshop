@@ -13,9 +13,16 @@ export const baseProducts = [
     brand: 'Radhe',
     rating: 4.4,
     reviewCount: 18,
-    images: [{ url: '/pexels-photo-45717.webp', alt: 'Art & Design - Creative Expression' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80', alt: 'Art & Design - Creative Expression' },
+      { url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80', alt: 'Art supplies and materials' }
+    ],
     isFeatured: true,
     createdAt: '2024-01-12T10:00:00.000Z',
+    hsn: '49011010',
+    weight: 400,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p2',
@@ -32,13 +39,15 @@ export const baseProducts = [
     rating: 4.2,
     reviewCount: 12,
     images: [
-      {
-        url: '/glasses-resting-on-stack-of-teal-books-with-mug-in-soft-natural-light-free-photo.jpeg',
-        alt: 'Hindi Literature - Kavya Sangrah',
-      },
+      { url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80', alt: 'Hindi Literature - Kavya Sangrah' },
+      { url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80', alt: 'Open book with poetry' }
     ],
     isFeatured: true,
     createdAt: '2024-01-10T09:00:00.000Z',
+    hsn: '49011010',
+    weight: 350,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p3',
@@ -54,9 +63,16 @@ export const baseProducts = [
     brand: 'Radhe',
     rating: 4.5,
     reviewCount: 21,
-    images: [{ url: '/stack-of-books.png', alt: 'Economics - Principles & Practice' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80', alt: 'Economics - Principles & Practice' },
+      { url: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80', alt: 'Business and economics concepts' }
+    ],
     isFeatured: true,
     createdAt: '2024-01-09T08:30:00.000Z',
+    hsn: '49011010',
+    weight: 450,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p4',
@@ -72,9 +88,16 @@ export const baseProducts = [
     brand: 'Radhe',
     rating: 4.6,
     reviewCount: 27,
-    images: [{ url: '/download.jpeg', alt: 'Computer Science Basics' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&q=80', alt: 'Computer Science Basics' },
+      { url: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80', alt: 'Programming and coding' }
+    ],
     isFeatured: true,
     createdAt: '2024-01-08T08:00:00.000Z',
+    hsn: '49011010',
+    weight: 400,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p5',
@@ -90,8 +113,15 @@ export const baseProducts = [
     brand: 'Radhe',
     rating: 4.3,
     reviewCount: 16,
-    images: [{ url: '/gettyimages-1455958786-612x612.jpg', alt: 'Mathematics for Class 10' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80', alt: 'Mathematics for Class 10' },
+      { url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&q=80', alt: 'Math equations and formulas' }
+    ],
     createdAt: '2024-01-07T07:30:00.000Z',
+    hsn: '49011010',
+    weight: 350,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p6',
@@ -107,9 +137,16 @@ export const baseProducts = [
     brand: 'Cello',
     rating: 4.3,
     reviewCount: 34,
-    images: [{ url: '/stationery.png', alt: 'Premium Ball Pens' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&q=80', alt: 'Premium Ball Pens' },
+      { url: 'https://images.unsplash.com/photo-1565022536102-f7a6e4d28f71?w=800&q=80', alt: 'Pens collection' }
+    ],
     isBestSeller: true,
     createdAt: '2024-01-03T05:30:00.000Z',
+    hsn: '96081099',
+    weight: 50,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p7',
@@ -125,8 +162,15 @@ export const baseProducts = [
     brand: 'Classmate',
     rating: 4.1,
     reviewCount: 22,
-    images: [{ url: '/stack-of-books.png', alt: 'Notebooks A5' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=800&q=80', alt: 'Notebooks A5' },
+      { url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80', alt: 'Notebook pages' }
+    ],
     createdAt: '2024-01-02T05:00:00.000Z',
+    hsn: '48201030',
+    weight: 600,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p8',
@@ -142,8 +186,15 @@ export const baseProducts = [
     brand: 'Camel',
     rating: 4.4,
     reviewCount: 19,
-    images: [{ url: '/palette.png', alt: 'Acrylic Paint Set' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80', alt: 'Acrylic Paint Set' },
+      { url: 'https://images.unsplash.com/photo-1525909002-1b05e0c869d8?w=800&q=80', alt: 'Paint tubes and brushes' }
+    ],
     createdAt: '2024-01-01T04:30:00.000Z',
+    hsn: '32131000',
+    weight: 400,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p9',
@@ -159,8 +210,15 @@ export const baseProducts = [
     brand: 'Camlin',
     rating: 4.2,
     reviewCount: 15,
-    images: [{ url: '/paper-crafts.png', alt: 'Sketch Pad A4' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=800&q=80', alt: 'Sketch Pad A4' },
+      { url: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80', alt: 'Sketching materials' }
+    ],
     createdAt: '2023-12-31T04:00:00.000Z',
+    hsn: '48201030',
+    weight: 500,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
   {
     id: 'p10',
@@ -176,7 +234,14 @@ export const baseProducts = [
     brand: 'Fevicryl',
     rating: 4.0,
     reviewCount: 11,
-    images: [{ url: '/paper-crafts.png', alt: 'Craft Paper Pack' }],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80', alt: 'Craft Paper Pack' },
+      { url: 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=800&q=80', alt: 'Colorful craft papers' }
+    ],
     createdAt: '2023-12-30T03:30:00.000Z',
+    hsn: '48236900',
+    weight: 300,
+    weightUnit: 'g',
+    countryOfOrigin: 'India',
   },
 ];

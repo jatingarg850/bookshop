@@ -136,6 +136,11 @@ export default function ProductPage() {
   const hasSpecifications = product.specifications && Object.keys(product.specifications).length > 0;
   const hasFeatures = product.features && product.features.length > 0;
 
+  // Check if product has images
+  const hasImages = product.images && product.images.length > 0;
+  const productImages = hasImages ? product.images : [];
+  const currentImage = productImages[selectedImage] || null;
+
   return (
     <div className="container-max py-12">
       {/* Main Product Section */}
@@ -143,9 +148,25 @@ export default function ProductPage() {
         {/* Images */}
         <div>
           <div className="bg-gray-100 rounded-xl overflow-hidden mb-4 h-96 relative">
-            {product.images[selectedImage] && (
-              <Image src={product.images[selectedImage].url} alt={product.images[selectedImage].alt || product.name}
-                fill className="object-cover" />
+            {currentImage ? (
+              <Image 
+                src={currentImage.url} 
+                alt={currentImage.alt || product.name}
+                fill 
+                className="object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            ) : (
+              // Text-only placeholder for products without authentic covers
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                <div className="text-6xl mb-4">📚</div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">{product.name}</h3>
+                <p className="text-sm text-gray-500">Authentic NCERT Book Cover Coming Soon</p>
+                <p className="text-xs text-gray-400 mt-2">We only display verified textbook covers</p>
+              </div>
             )}
             <div className="absolute top-3 left-3 flex flex-col gap-1">
               {product.isNewArrival && <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">NEW</span>}
@@ -154,12 +175,22 @@ export default function ProductPage() {
             </div>
             {hasDiscount && <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold">-{discountPercent}%</span>}
           </div>
-          {product.images.length > 1 && (
+          {productImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
-              {product.images.map((img: any, idx: number) => (
+              {productImages.map((img: any, idx: number) => (
                 <button key={idx} onClick={() => setSelectedImage(idx)}
                   className={`w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? 'border-primary-600' : 'border-gray-200'}`}>
-                  <Image src={img.url} alt={img.alt || `${product.name} ${idx}`} width={80} height={80} className="object-cover w-full h-full" />
+                  <Image 
+                    src={img.url} 
+                    alt={img.alt || `${product.name} ${idx}`} 
+                    width={80} 
+                    height={80} 
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
                 </button>
               ))}
             </div>

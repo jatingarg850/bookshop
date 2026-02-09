@@ -1,20 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProductCard } from '@/components/products/ProductCard';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Pagination } from '@/components/ui/Pagination';
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
-  const searchParamsString = searchParams.toString();
 
   // Filters: default values that don't exclude products
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [minPrice, setMinPrice] = useState(''); // empty means no min
   const [maxPrice, setMaxPrice] = useState(''); // empty means no max
+  const [minPriceInput, setMinPriceInput] = useState(''); // for input display
+  const [maxPriceInput, setMaxPriceInput] = useState(''); // for input display
   const [inStock, setInStock] = useState(false);
   const [onSale, setOnSale] = useState(false);
   const [sort, setSort] = useState('newest');
@@ -45,13 +46,30 @@ export default function ProductsPage() {
     setCategory('All');
     setMinPrice('');
     setMaxPrice('');
+    setMinPriceInput('');
+    setMaxPriceInput('');
     setInStock(false);
     setOnSale(false);
     setSort('newest');
     setPage(1);
   };
 
-  // Sync URL query params -> filter state (one-way)
+  // Debounce price inputs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('Debounce timer fired:', { minPriceInput, maxPriceInput });
+      setMinPrice(minPriceInput);
+      setMaxPrice(maxPriceInput);
+      if (minPriceInput || maxPriceInput) {
+        console.log('Setting page to 1 due to price change');
+        setPage(1);
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [minPriceInput, maxPriceInput]);
+
+  // Sync URL query params -> filter state (one-way) - ONLY on mount
   useEffect(() => {
     const urlSearch = searchParams.get('search') || '';
     const urlCategory = searchParams.get('category') || '';
@@ -71,14 +89,14 @@ export default function ProductsPage() {
         'All'
       : 'All';
 
-    setSearch((prev) => (prev === urlSearch ? prev : urlSearch));
-    setCategory((prev) => (prev === normalizedCategory ? prev : normalizedCategory));
-    setMinPrice((prev) => (prev === urlMinPrice ? prev : urlMinPrice));
-    setMaxPrice((prev) => (prev === urlMaxPrice ? prev : urlMaxPrice));
-    setInStock((prev) => (prev === urlInStock ? prev : urlInStock));
-    setOnSale((prev) => (prev === urlOnSale ? prev : urlOnSale));
-    setPage(1);
-  }, [searchParamsString, categories]);
+    if (urlSearch) setSearch(urlSearch);
+    if (urlCategory) setCategory(normalizedCategory);
+    if (urlMinPrice) setMinPrice(urlMinPrice);
+    if (urlMaxPrice) setMaxPrice(urlMaxPrice);
+    if (urlInStock) setInStock(urlInStock);
+    if (urlOnSale) setOnSale(urlOnSale);
+    // Don't reset page here - let user control pagination
+  }, []); // Only run once on mount
 
   // Fetch products from Mongo-backed API
   useEffect(() => {
@@ -89,6 +107,9 @@ export default function ProductsPage() {
       try {
         setLoading(true);
         setError('');
+
+        // Scroll to top when page changes
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         const params = new URLSearchParams();
 
@@ -103,6 +124,19 @@ export default function ProductsPage() {
         params.set('page', String(page));
         params.set('limit', String(limit));
 
+        console.log('Fetching products with params:', {
+          page,
+          limit,
+          search,
+          category,
+          minPrice,
+          maxPrice,
+          inStock,
+          onSale,
+          sort,
+          url: `/api/products?${params.toString()}`
+        });
+
         const res = await fetch(`/api/products?${params.toString()}`, {
           signal: controller.signal,
         });
@@ -113,6 +147,15 @@ export default function ProductsPage() {
         }
 
         if (cancelled) return;
+
+        console.log('API Response:', {
+          productsCount: data.products?.length,
+          total: data.pagination?.total,
+          page: data.pagination?.page,
+          pages: data.pagination?.pages,
+          firstProduct: data.products?.[0]?.name,
+          lastProduct: data.products?.[data.products?.length - 1]?.name
+        });
 
         setItems(Array.isArray(data.products) ? data.products : []);
 
@@ -139,7 +182,7 @@ export default function ProductsPage() {
       }
     };
 
-    const t = setTimeout(run, search.trim() ? 250 : 0);
+    const t = setTimeout(run, 0);
 
     return () => {
       cancelled = true;
@@ -225,6 +268,7 @@ export default function ProductsPage() {
                   <select
                     value={category}
                     onChange={(e) => {
+                      console.log('Category changed to:', e.target.value);
                       setCategory(e.target.value);
                       setPage(1);
                     }}
@@ -247,20 +291,20 @@ export default function ProductsPage() {
                     <Input
                       type="number"
                       placeholder="Min"
-                      value={minPrice}
+                      value={minPriceInput}
                       onChange={(e) => {
-                        setMinPrice(e.target.value);
-                        setPage(1);
+                        console.log('Min price input changed to:', e.target.value);
+                        setMinPriceInput(e.target.value);
                       }}
                       className="text-sm"
                     />
                     <Input
                       type="number"
                       placeholder="Max"
-                      value={maxPrice}
+                      value={maxPriceInput}
                       onChange={(e) => {
-                        setMaxPrice(e.target.value);
-                        setPage(1);
+                        console.log('Max price input changed to:', e.target.value);
+                        setMaxPriceInput(e.target.value);
                       }}
                       className="text-sm"
                     />
@@ -340,38 +384,14 @@ export default function ProductsPage() {
                   </div>
 
                   {/* Pagination */}
-                  {pages > 1 && (
-                    <div className="flex justify-center gap-2 flex-wrap">
-                      <Button
-                        variant="outline"
-                        disabled={currentPage === 1}
-                        onClick={() => setPage(currentPage - 1)}
-                      >
-                        Previous
-                      </Button>
-                      {Array.from({ length: Math.min(pages, 5) }, (_, i) => {
-                        const p = currentPage <= 3 ? i + 1 : currentPage + i - 2;
-                        if (p < 1 || p > pages) return null;
-                        return (
-                          <Button
-                            key={p}
-                            variant={currentPage === p ? 'primary' : 'outline'}
-                            onClick={() => setPage(p)}
-                            size="sm"
-                          >
-                            {p}
-                          </Button>
-                        );
-                      })}
-                      <Button
-                        variant="outline"
-                        disabled={currentPage === pages}
-                        onClick={() => setPage(currentPage + 1)}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  )}
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={pages}
+                    onPageChange={(p) => {
+                      console.log('Page changed to:', p);
+                      setPage(p);
+                    }}
+                  />
                 </>
               )}
             </div>
@@ -379,5 +399,25 @@ export default function ProductsPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen">
+        <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-12 sm:py-16">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
+              <span className="block">Our</span>
+              <span className="block text-primary-600">Products</span>
+            </h1>
+            <p className="mt-3 text-gray-600">Loading products...</p>
+          </div>
+        </section>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }
