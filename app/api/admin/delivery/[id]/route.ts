@@ -9,7 +9,6 @@ async function checkAdmin() {
   const user: any = session?.user;
   if (!user) return null;
 
-  // Prefer role-based auth, but allow legacy ADMIN_EMAIL for backward compatibility.
   const legacyAdminEmail = process.env.ADMIN_EMAIL;
   if (user.role === 'admin') return session;
   if (legacyAdminEmail && user.email && user.email === legacyAdminEmail) return session;
@@ -32,7 +31,14 @@ export async function GET(
     const delivery = await Delivery.findOne({ orderId: id });
 
     if (!delivery) {
-      return NextResponse.json({ error: 'Delivery not found' }, { status: 404 });
+      // Return 404 with a clear message instead of error
+      return NextResponse.json(
+        { 
+          delivery: null,
+          message: 'Delivery record not found. Order may not have been shipped yet.' 
+        },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ delivery });

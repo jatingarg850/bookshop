@@ -54,6 +54,9 @@ export default function CheckoutPage() {
   });
 
   const [taxBreakdown, setTaxBreakdown] = useState<any>(null);
+  const [pincodeValidating, setPincodeValidating] = useState(false);
+  const [pincodeValid, setPincodeValid] = useState<boolean | null>(null);
+  const [pincodeError, setPincodeError] = useState<string>('');
 
   // Define fetchProductDetailsCallback before using it in useEffect
   const fetchProductDetailsCallback = useCallback(async () => {
@@ -171,6 +174,43 @@ export default function CheckoutPage() {
     });
   }
 
+  async function validatePincode(pincode: string) {
+    if (!pincode || pincode.length < 5) {
+      setPincodeValid(false);
+      setPincodeError('Pincode must be at least 5 digits');
+      return false;
+    }
+
+    try {
+      setPincodeValidating(true);
+      setPincodeError('');
+      
+      const res = await fetch('/api/shiprocket/check-serviceability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ delivery_pincode: pincode }),
+      });
+
+      const data = await res.json();
+      
+      if (data.serviceable) {
+        setPincodeValid(true);
+        setPincodeError('');
+        return true;
+      } else {
+        setPincodeValid(false);
+        setPincodeError(data.message || 'This pincode is not serviceable');
+        return false;
+      }
+    } catch (error: any) {
+      setPincodeValid(false);
+      setPincodeError(error.message || 'Failed to validate pincode');
+      return false;
+    } finally {
+      setPincodeValidating(false);
+    }
+  }
+
   function handleSelectAddress(addressId: string) {
     setSelectedAddressId(addressId);
     const address = savedAddresses.find((a) => a._id === addressId);
@@ -210,6 +250,14 @@ export default function CheckoutPage() {
 
     if (paymentMethod === 'upi' && !settings?.enableUPI) {
       setError('UPI payment is not available');
+      setLoading(false);
+      return;
+    }
+
+    // Validate pincode serviceability BEFORE creating order
+    const isPincodeServiceable = await validatePincode(formData.pincode);
+    if (!isPincodeServiceable) {
+      setError(pincodeError || 'Delivery location is not serviceable. Please try another pincode.');
       setLoading(false);
       return;
     }
@@ -436,8 +484,25 @@ export default function CheckoutPage() {
                     label="Pincode"
                     required
                     value={formData.pincode}
-                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, pincode: e.target.value });
+                      setPincodeValid(null); // Reset validation on change
+                    }}
+                    onBlur={() => {
+                      if (formData.pincode) {
+                        validatePincode(formData.pincode);
+                      }
+                    }}
                   />
+                  {pincodeValidating && (
+                    <p className="text-sm text-blue-600 mt-1">Checking serviceability...</p>
+                  )}
+                  {pincodeValid === false && (
+                    <p className="text-sm text-red-600 mt-1">❌ {pincodeError}</p>
+                  )}
+                  {pincodeValid === true && (
+                    <p className="text-sm text-green-600 mt-1">✓ Pincode is serviceable</p>
+                  )}
                 </div>
                 <Input
                   label="Address"

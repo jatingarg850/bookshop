@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { calculateOrderWeight } from '@/lib/utils/shippingCalculator';
 
 interface ShippingRate {
   courier_company_id: number;
@@ -26,10 +27,24 @@ export default function AdminOrderDetailPage() {
   const [rateError, setRateError] = useState<string | null>(null);
   const [selectedCourier, setSelectedCourier] = useState<number | null>(null);
   const [shipping, setShipping] = useState(false);
+  const [storePincode, setStorePincode] = useState<string>('121006');
 
   useEffect(() => {
+    fetchSettings();
     fetchOrder();
   }, [orderId]);
+
+  async function fetchSettings() {
+    try {
+      const res = await fetch('/api/settings');
+      if (res.ok) {
+        const data = await res.json();
+        setStorePincode(data.storePincode || '121006');
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  }
 
   async function fetchOrder() {
     try {
@@ -66,8 +81,10 @@ export default function AdminOrderDetailPage() {
       setLoadingRates(true);
       setRateError(null);
       
-      const weight = calculateWeight(order.items);
-      const pickup_postcode = process.env.NEXT_PUBLIC_STORE_PINCODE || '110001';
+      // Weight is now calculated correctly from product data
+      // Products with weight (e.g., 300g) will show as 0.3kg, not 0.5kg
+      const weight = calculateOrderWeight(order.items);
+      const pickup_postcode = storePincode;
       const delivery_postcode = order.shippingDetails.pincode;
       
       console.log('Calculating shipping rates:', {
@@ -84,8 +101,8 @@ export default function AdminOrderDetailPage() {
         return;
       }
 
-      if (!delivery_postcode || delivery_postcode.length !== 6) {
-        setRateError(`Invalid delivery pincode: ${delivery_postcode}. Must be 6 digits.`);
+      if (!delivery_postcode || delivery_postcode.length < 5) {
+        setRateError(`Invalid delivery pincode: ${delivery_postcode}. Must be at least 5 digits.`);
         console.error('Invalid pincode:', delivery_postcode);
         return;
       }
@@ -93,7 +110,7 @@ export default function AdminOrderDetailPage() {
       const payload = {
         pickup_postcode,
         delivery_postcode,
-        weight,
+        weight: Math.round(weight * 1000) / 1000,
         cod: order.payment.method === 'cod' ? 1 : 0,
       };
 
@@ -296,12 +313,12 @@ export default function AdminOrderDetailPage() {
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                 <p className="text-red-700 font-semibold">⚠️ Unable to fetch shipping rates</p>
                 <p className="text-red-600 text-sm mt-1">{rateError}</p>
-                <p className="text-red-600 text-xs mt-2">
+                <p className="text-red-600 text-xs mt-1">
                   <strong>Debug info:</strong> Check browser console (F12) for detailed logs. Verify:
                 </p>
                 <ul className="text-red-600 text-xs mt-1 ml-4 list-disc">
-                  <li>Delivery pincode is valid (6 digits): {order.shippingDetails.pincode}</li>
-                  <li>Pickup location ID is set: {process.env.NEXT_PUBLIC_STORE_PINCODE || '110001'}</li>
+                  <li>Delivery pincode is valid (5-6 digits): {order.shippingDetails.pincode}</li>
+                  <li>Pickup location pincode is set: {storePincode}</li>
                   <li>Shiprocket credentials are correct in .env.local</li>
                   <li>Server logs show authentication succeeded</li>
                 </ul>
@@ -416,30 +433,6 @@ export default function AdminOrderDetailPage() {
       </div>
     </AdminLayout>
   );
-}
-
-function calculateWeight(items: any[]): number {
-  if (!items || items.length === 0) return 0;
-  
-  // Use item weight if available, otherwise default to 0.5kg per item
-  const defaultWeightPerItem = 0.5;
-  const totalWeight = items.reduce((total, item) => {
-    const itemWeight = item.weight || defaultWeightPerItem;
-    return total + itemWeight * item.quantity;
-  }, 0);
-
-  console.log('Weight Calculation:', {
-    items_count: items.length,
-    total_weight: totalWeight,
-    items_details: items.map(i => ({
-      name: i.name,
-      qty: i.quantity,
-      weight: i.weight || defaultWeightPerItem,
-      total: (i.weight || defaultWeightPerItem) * i.quantity,
-    })),
-  });
-
-  return totalWeight;
 }
 
 function getStatusBadgeColor(status: string): string {

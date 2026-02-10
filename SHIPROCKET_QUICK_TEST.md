@@ -1,109 +1,92 @@
-# Quick Test Checklist - Shiprocket Shipping Rates
+# Shiprocket Quick Test Guide
 
-## Before Testing
-- [ ] Server running: `npm run dev`
-- [ ] .env.local has SHIPROCKET credentials
-- [ ] Browser F12 console open
-- [ ] Terminal visible for server logs
+## 🚀 Quick Start (2 minutes)
 
-## Test Steps
+### Test Shipping Rates
+1. Go to: **http://localhost:3000/admin/shiprocket-test**
+2. Keep Pickup: `121006` (Faridabad)
+3. Change Delivery to: `110001` (Delhi) ← **Use this for testing**
+4. Keep Weight: `1.0` kg
+5. Click **Test Route**
+6. ✅ You should see 2-3 courier options with prices
 
-### 1. Create Test Order with Known Pincodes
-Go to: http://localhost:3000/admin/orders
-- Find or create order with delivery pincode: **560001** (Bangalore)
-- Shipping from: **110001** (Delhi - default)
-- Order status must be: **confirmed**
-
-### 2. Click "Ship Order"
-Expected behavior (watch both console and terminal):
-
-**Browser Console Should Show:**
-```
-📊 Calculating shipping rates: {
-  weight: 2.5,
-  pickup_postcode: '110001',
-  delivery_postcode: '560001',
-  payment_method: 'cod'
-}
-📤 Requesting shipping rates with payload: {...}
-✅ Received shipping rates: [
-  { courier_name: 'Delhivery', rate: 85, etd: '2' },
-  ...
-]
-```
-
-**Server Terminal Should Show:**
-```
-🔐 Authenticating with Shiprocket...
-✅ Shiprocket authentication successful
-📦 Shipping Rates Request: {
-  pickup_postcode: '110001',
-  delivery_postcode: '560001',
-  weight: 2.5,
-  cod: 1
-}
-📤 Sending to Shiprocket API: {...}
-✅ Shiprocket Response: {rates: [...]}
-```
-
-### 3. Expected UI Result
-- Courier list displays (Delhivery, FedEx, etc.)
-- Can select a courier
-- "Ship Order" button becomes enabled
-- Red error box NOT shown
-
-### 4. If Error Shows
-**Red error box appears with message:**
-Check the error message:
-- "Invalid delivery pincode: ABC" → Pincode must be 6 digits
-- "Invalid weight calculated: 0" → Order items not weighing
-- "Failed to authenticate" → Check SHIPROCKET_EMAIL and PASSWORD in .env.local
-- "No shipping rates available" → Route might not be serviceable by Shiprocket
-
-**Action:** Check SHIPROCKET_DEBUGGING_GUIDE.md for detailed fixes
-
-## Success Criteria
-- [ ] Shiprocket authenticates (🔐 ✅ shown in logs)
-- [ ] Rates API called (📦 logs show request/response)
-- [ ] Courier list displays in UI
-- [ ] Can select courier
-- [ ] No red error boxes
-- [ ] Browser console shows ✅ logs
-- [ ] Server logs show ✅ messages
-
-## Alternative Test Routes
-If 110001→560001 fails, try:
-- **110001 → 400001** (Mumbai)
-- **110001 → 700001** (Kolkata)
-- **110001 → 452001** (Indore)
-
-## Reset Instructions
-If stuck, try:
-```bash
-# Restart server
-npm run dev
-
-# Check credentials
-cat .env.local | grep SHIPROCKET
-
-# Verify pickup location
-# 1. Log in to https://app.shiprocket.in
-# 2. Settings → Pickup Locations
-# 3. Check location ID 1 is active
-```
-
-## Performance Check
-Metrics to monitor:
-- Authentication: ~1-2 seconds
-- Rate calculation: ~2-3 seconds
-- Total time: Should be < 5 seconds
-
-If slower, check:
-- Internet connection
-- Shiprocket API status
-- Server resources
+### Test Full Order Shipping
+1. Go to: **http://localhost:3000/checkout**
+2. Add a product to cart
+3. Enter delivery address with pincode: `110001` (Delhi)
+4. Complete checkout
+5. Go to: **http://localhost:3000/admin/orders**
+6. Click your order
+7. Select a courier and click "Ship Order"
+8. ✅ You should see: `Order shipped successfully! AWB: [number]`
 
 ---
 
-**See SHIPROCKET_FIX_SUMMARY.md for detailed implementation**
-**See SHIPROCKET_DEBUGGING_GUIDE.md for troubleshooting**
+## ✅ Working Pincodes (Tested)
+
+From Faridabad (121006) to:
+- **110001** - Delhi ✅
+- **560001** - Bangalore ✅
+- **400001** - Mumbai ✅
+- **500001** - Hyderabad ✅
+- **411001** - Pune ✅
+
+---
+
+## ❌ Why 404 Errors Happen
+
+| Scenario | Error | Solution |
+|----------|-------|----------|
+| Same city (121006 → 121006) | 404 | Use different city |
+| Non-serviceable route | 404 | Use major metro |
+| Invalid pincode | 400 | Use 6-digit pincode |
+| Bad credentials | 401 | Check .env file |
+
+---
+
+## 🔍 Debug Checklist
+
+- [ ] Delivery pincode is different from pickup (121006)
+- [ ] Delivery pincode is a major city (Delhi, Mumbai, etc.)
+- [ ] Product has weight set (in grams)
+- [ ] Order status is "confirmed"
+- [ ] Check browser console (F12) for detailed logs
+- [ ] Check server logs in terminal
+
+---
+
+## 📋 Expected Success Response
+
+```json
+{
+  "success": true,
+  "rates": [
+    {
+      "courier_name": "Delhivery",
+      "rate": 85,
+      "etd": "2"
+    },
+    {
+      "courier_name": "Bluedart",
+      "rate": 110,
+      "etd": "1"
+    }
+  ]
+}
+```
+
+---
+
+## 🎯 Next Steps
+
+1. ✅ Test with Delhi pincode (110001)
+2. ✅ Create a test order with Delhi address
+3. ✅ Ship the order and get AWB
+4. ✅ Track the shipment
+5. ✅ System is production-ready!
+
+---
+
+## 📞 Need Help?
+
+See: `SHIPROCKET_TROUBLESHOOTING.md` for detailed solutions

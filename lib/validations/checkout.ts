@@ -7,7 +7,9 @@ export const shippingSchema = z.object({
   address: z.string().min(5, 'Address is required'),
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
-  pincode: z.string().regex(/^\d{6}$/, 'Valid 6-digit pincode required'),
+  pincode: z.string()
+    .regex(/^\d{5,6}$/, 'Valid 5-6 digit pincode required')
+    .transform(val => val.padStart(6, '0')), // Pad with leading zeros if needed
 });
 
 export const checkoutSchema = z.object({

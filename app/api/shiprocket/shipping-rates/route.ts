@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getShiprocketClient } from '@/lib/utils/shiprocket';
+import { MOCK_SHIPPING_RATES, isMockMode } from '@/lib/utils/shiprocket-mock';
 
 export async function POST(req: NextRequest) {
+  let pickup_postcode: string;
+  let delivery_postcode: string;
+  
   try {
-    const { pickup_postcode, delivery_postcode, weight, cod, length, breadth, height, declared_value } = await req.json();
+    const data = await req.json();
+    pickup_postcode = data.pickup_postcode;
+    delivery_postcode = data.delivery_postcode;
+    const { weight, cod, length, breadth, height, declared_value } = data;
 
     // Validation with detailed logs
     console.log('Shipping Rates Request:', {
@@ -40,6 +47,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if mock mode is enabled
+    if (isMockMode()) {
+      console.log('📦 Using MOCK shipping rates (SHIPROCKET_MOCK_MODE=true)');
+      return NextResponse.json(MOCK_SHIPPING_RATES);
+    }
+
     const client = await getShiprocketClient();
     console.log('Authenticated with Shiprocket');
     
@@ -73,10 +86,23 @@ export async function POST(req: NextRequest) {
       status: error.response?.status,
       config: error.config?.url,
     });
+
+    // Handle specific error cases
+    let errorMessage = error.message || 'Failed to fetch shipping rates';
+    
+    if (error.response?.status === 404) {
+      errorMessage = `No shipping routes available from pincode ${pickup_postcode} to ${delivery_postcode}. This route may not be serviceable by Shiprocket. Please verify both pincodes are valid and serviceable. Contact support if you believe this is an error.`;
+    } else if (error.response?.status === 401) {
+      errorMessage = 'Shiprocket authentication failed. Please check your credentials in .env file.';
+    } else if (error.response?.status === 400) {
+      errorMessage = `Invalid request parameters. Weight: ${weight}kg, Pickup: ${pickup_postcode}, Delivery: ${delivery_postcode}. ${error.response?.data?.message || ''}`;
+    }
+
     return NextResponse.json(
       { 
-        error: error.response?.data?.message || error.message || 'Failed to fetch shipping rates',
+        error: errorMessage,
         details: error.response?.data?.errors || null,
+        shiprocketStatus: error.response?.status,
       },
       { status: error.response?.status || 500 }
     );

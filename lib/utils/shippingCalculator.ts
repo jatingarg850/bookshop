@@ -61,7 +61,7 @@ export function convertWeightToKg(weight: number, unit: string = 'g'): number {
  * Formula: (Length × Width × Height) / 5000 (standard divisor)
  */
 export function calculateVolumetricWeight(
-  dimensions: {
+  dimensions?: {
     length?: number;
     width?: number;
     height?: number;
@@ -69,7 +69,7 @@ export function calculateVolumetricWeight(
     unit?: string;
   }
 ): number {
-  if (!dimensions.length || !dimensions.width || !dimensions.height) {
+  if (!dimensions || !dimensions.length || !dimensions.width || !dimensions.height) {
     return 0;
   }
 
@@ -100,13 +100,14 @@ export function getEffectiveWeight(
   dimensions?: any
 ): number {
   let actualWeightKg = 0;
-  if (actualWeight) {
+  if (actualWeight && actualWeight > 0) {
     actualWeightKg = convertWeightToKg(actualWeight, weightUnit || 'g');
   }
 
   const volumetricWeightKg = calculateVolumetricWeight(dimensions);
 
-  // Return the greater of the two
+  // Return the greater of the two (actual or volumetric)
+  // No minimum enforcement here - let calculateOrderWeight handle that
   return Math.max(actualWeightKg, volumetricWeightKg);
 }
 
@@ -125,10 +126,17 @@ export function calculateOrderWeightInGrams(items: Array<ProductItem>): number {
  * Calculate total order weight (in kg, for backward compatibility)
  */
 export function calculateOrderWeight(items: Array<ProductItem>): number {
-  return items.reduce((total, item) => {
+  if (!items || items.length === 0) {
+    return 0.5; // Default minimum weight
+  }
+
+  const totalWeight = items.reduce((total, item) => {
     const itemWeight = getEffectiveWeight(item.weight, item.weightUnit, item.dimensions);
-    return total + itemWeight * item.quantity;
+    return total + itemWeight * (item.quantity || 1);
   }, 0);
+
+  // Return actual weight if calculated, otherwise use minimum
+  return totalWeight > 0 ? totalWeight : 0.5;
 }
 
 /**

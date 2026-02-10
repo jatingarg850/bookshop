@@ -198,6 +198,7 @@ const productSchema = new Schema<IProduct>(
     },
     weight: {
       type: Number,
+      required: true,
       min: 0,
     },
     weightUnit: {

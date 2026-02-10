@@ -27,6 +27,7 @@ interface OrderCreateRequest {
   order_date: string;
   pickup_location_id: number;
   billing_customer_name: string;
+  billing_last_name?: string;
   billing_email: string;
   billing_phone: string;
   billing_address: string;
@@ -114,32 +115,27 @@ interface TrackingResponse {
 class ShiprocketClient {
   private client: AxiosInstance;
   private token: string | null = null;
-  private email: string;
-  private password: string;
+  private apiKey: string;
 
-  constructor(email: string, password: string) {
-    this.email = email;
-    this.password = password;
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
     this.client = axios.create({
       baseURL: SHIPROCKET_API_BASE,
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
       },
     });
+    this.token = apiKey;
   }
 
   async authenticate(): Promise<void> {
     try {
       console.log('Authenticating with Shiprocket...');
-      const response = await axios.post<ShiprocketAuthResponse>(
-        `${SHIPROCKET_API_BASE}/auth/login`,
-        {
-          email: this.email,
-          password: this.password,
-        }
-      );
-      this.token = response.data.token;
-      this.client.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+      console.log('API Key length:', this.apiKey?.length);
+      
+      // Verify the token is valid by making a simple request
+      const response = await this.client.get('/settings/company/pickup');
       console.log('Shiprocket authentication successful');
     } catch (error: any) {
       console.error('Shiprocket authentication failed:', {
@@ -172,10 +168,17 @@ class ShiprocketClient {
 
   async createOrder(request: OrderCreateRequest): Promise<OrderCreateResponse> {
     try {
+      console.log('Creating order in Shiprocket with request:', JSON.stringify(request, null, 2));
       const response = await this.client.post<OrderCreateResponse>('/orders/create/adhoc', request);
+      console.log('Order creation response:', response.data);
       return response.data;
-    } catch (error) {
-      console.error('Failed to create order:', error);
+    } catch (error: any) {
+      console.error('Failed to create order:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        request: error.config?.data,
+      });
       throw error;
     }
   }
@@ -237,14 +240,13 @@ class ShiprocketClient {
 }
 
 export async function getShiprocketClient(): Promise<ShiprocketClient> {
-  const email = process.env.SHIPROCKET_EMAIL;
-  const password = process.env.SHIPROCKET_PASSWORD;
+  const apiKey = process.env.SHIPROCKET_API_KEY;
 
-  if (!email || !password) {
-    throw new Error('Shiprocket credentials not configured');
+  if (!apiKey) {
+    throw new Error('Shiprocket API key not configured. Set SHIPROCKET_API_KEY in .env');
   }
 
-  const client = new ShiprocketClient(email, password);
+  const client = new ShiprocketClient(apiKey);
   await client.authenticate();
   return client;
 }
