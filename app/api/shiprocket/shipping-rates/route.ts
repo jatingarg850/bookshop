@@ -3,14 +3,16 @@ import { getShiprocketClient } from '@/lib/utils/shiprocket';
 import { MOCK_SHIPPING_RATES, isMockMode } from '@/lib/utils/shiprocket-mock';
 
 export async function POST(req: NextRequest) {
-  let pickup_postcode: string;
-  let delivery_postcode: string;
+  let pickup_postcode: string = '';
+  let delivery_postcode: string = '';
+  let weight: number = 0;
   
   try {
     const data = await req.json();
     pickup_postcode = data.pickup_postcode;
     delivery_postcode = data.delivery_postcode;
-    const { weight, cod, length, breadth, height, declared_value } = data;
+    weight = data.weight;
+    const { cod, length, breadth, height, declared_value } = data;
 
     // Validation with detailed logs
     console.log('Shipping Rates Request:', {

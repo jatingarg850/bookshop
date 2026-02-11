@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getShiprocketClient } from '@/lib/utils/shiprocket';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     console.log('Testing Shiprocket credentials...');
     
-    const client = await getShiprocketClient();
+    await getShiprocketClient();
     
     return NextResponse.json({
       success: true,

@@ -153,111 +153,6 @@ async function createShiprocketOrder(order: any) {
     return null;
   }
 }
-        selling_price: item.priceAtPurchase,
-      })),
-      payment_method: order.payment.method === 'cod' ? 'COD' : 'Prepaid',
-      sub_total: order.subtotal,
-      weight,
-      length: 10,
-      breadth: 10,
-      height: 10,
-    };
-
-    // Create order in Shiprocket
-    const createResponse = await client.createOrder(shiprocketOrder);
-
-    if (createResponse.status_code !== 1) {
-      console.error('Failed to create Shiprocket order:', createResponse);
-      return null;
-    }
-
-    console.log('✓ Shiprocket order created:', {
-      shiprocketOrderId: createResponse.order_id,
-      shipmentId: createResponse.shipment_id,
-    });
-
-    // Update order with Shiprocket details
-    order.shiprocketOrderId = createResponse.order_id;
-    order.shiprocketShipmentId = createResponse.shipment_id;
-    await order.save();
-
-    // Get available couriers and ship with the cheapest one
-    try {
-      const ratesResponse = await client.getShippingRates({
-        pickup_postcode: process.env.NEXT_PUBLIC_STORE_PINCODE || '121006',
-        delivery_postcode: order.shippingDetails.pincode,
-        weight,
-        cod: order.payment.method === 'cod' ? 1 : 0,
-      });
-
-      if (ratesResponse.rates && ratesResponse.rates.length > 0) {
-        // Get the first available courier (usually cheapest)
-        const selectedCourier = ratesResponse.rates[0];
-        const courierId = selectedCourier.courier_company_id;
-
-        console.log('📦 Shipping with courier:', selectedCourier.courier_name);
-
-        // Ship the order
-        const shipResponse = await client.shipOrder({
-          shipment_id: createResponse.shipment_id,
-          courier_id: courierId,
-        });
-
-        if (shipResponse.status_code === 1) {
-          console.log('✓ Order shipped successfully:', {
-            awb: shipResponse.awb_code,
-            courier: shipResponse.courier_name,
-          });
-
-          // Update order with shipping details
-          order.orderStatus = 'shipped';
-          order.shiprocketAWB = shipResponse.awb_code;
-          order.shiprocketCourier = shipResponse.courier_name;
-          await order.save();
-
-          // Update or create delivery record
-          let delivery = await Delivery.findOne({ orderId: order._id.toString() });
-
-          if (!delivery) {
-            const estimatedDeliveryDate = new Date();
-            estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 5);
-
-            delivery = await Delivery.create({
-              orderId: order._id.toString(),
-              trackingNumber: shipResponse.awb_code,
-              carrier: shipResponse.courier_name,
-              estimatedDeliveryDate,
-              status: 'picked_up',
-              location: 'Processing',
-              notes: `Shipped via ${shipResponse.courier_name}`,
-              shiprocketAWB: shipResponse.awb_code,
-            });
-          } else {
-            delivery.trackingNumber = shipResponse.awb_code;
-            delivery.carrier = shipResponse.courier_name;
-            delivery.status = 'picked_up';
-            delivery.shiprocketAWB = shipResponse.awb_code;
-            await delivery.save();
-          }
-
-          return { success: true, awb: shipResponse.awb_code };
-        } else {
-          console.error('Failed to ship order:', shipResponse);
-          return null;
-        }
-      } else {
-        console.warn('No shipping rates available for this pincode');
-        return null;
-      }
-    } catch (shippingError: any) {
-      console.error('Error getting shipping rates or shipping order:', shippingError.message);
-      return null;
-    }
-  } catch (shiprocketError: any) {
-    console.error('Error creating Shiprocket order:', shiprocketError.message);
-    return null;
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -370,7 +265,7 @@ export async function POST(req: NextRequest) {
     console.log('Order creation - Weight calculation DEBUG:', {
       itemsCount: orderItems.length,
       totalWeight,
-      itemsDetail: orderItems.map(i => ({
+      itemsDetail: orderItems.map((i: any) => ({
         name: i.name,
         weight: i.weight,
         weightUnit: i.weightUnit,
@@ -429,7 +324,7 @@ export async function POST(req: NextRequest) {
       orderId: order._id,
       totalWeight: order.totalWeight,
       itemsCount: order.items.length,
-      itemsInDB: order.items.map(i => ({
+      itemsInDB: order.items.map((i: any) => ({
         name: i.name,
         weight: i.weight,
         weightUnit: i.weightUnit,
@@ -456,34 +351,6 @@ export async function POST(req: NextRequest) {
       console.log('📦 COD order detected, automatically creating Shiprocket order...');
       await createShiprocketOrder(order);
     }
-
-    return NextResponse.json({
-      orderId: order._id.toString(),
-      deliveryId: delivery._id.toString(),
-      totalAmount,
-      shippingCost,
-      tax,
-      subtotal,
-      totalWeight,
-    });
-  } catch (error: any) {
-    console.error('Order creation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create order' },
-      { status: 400 }
-    );
-  }
-}
-
-    const delivery = await Delivery.create({
-      orderId: order._id.toString(),
-      trackingNumber: `TRK-${order._id.toString().slice(-8).toUpperCase()}`,
-      carrier: 'Pending',
-      estimatedDeliveryDate,
-      status: 'pending',
-      location: validatedShipping.shipping.city,
-      notes: 'Order placed, awaiting shipment',
-    });
 
     return NextResponse.json({
       orderId: order._id.toString(),

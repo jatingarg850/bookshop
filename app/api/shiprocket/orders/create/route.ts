@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       items: order.items.length,
       totalWeight: order.totalWeight,
       shippingDetails: order.shippingDetails,
-      itemsWithWeight: order.items.map(i => ({
+      itemsWithWeight: order.items.map((i: any) => ({
         name: i.name,
         weight: i.weight,
         weightUnit: i.weightUnit,

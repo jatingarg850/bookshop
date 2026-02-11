@@ -2,10 +2,6 @@ import axios, { AxiosInstance } from 'axios';
 
 const SHIPROCKET_API_BASE = 'https://apiv2.shiprocket.in/v1/external';
 
-interface ShiprocketAuthResponse {
-  token: string;
-}
-
 interface ShippingRateRequest {
   pickup_postcode: string;
   delivery_postcode: string;
@@ -114,7 +110,6 @@ interface TrackingResponse {
 
 class ShiprocketClient {
   private client: AxiosInstance;
-  private token: string | null = null;
   private apiKey: string;
 
   constructor(apiKey: string) {
@@ -126,7 +121,6 @@ class ShiprocketClient {
         'Authorization': `Bearer ${apiKey}`,
       },
     });
-    this.token = apiKey;
   }
 
   async authenticate(): Promise<void> {
@@ -135,7 +129,7 @@ class ShiprocketClient {
       console.log('API Key length:', this.apiKey?.length);
       
       // Verify the token is valid by making a simple request
-      const response = await this.client.get('/settings/company/pickup');
+      await this.client.get('/settings/company/pickup');
       console.log('Shiprocket authentication successful');
     } catch (error: any) {
       console.error('Shiprocket authentication failed:', {

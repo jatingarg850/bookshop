@@ -38,14 +38,6 @@ export function ProductCard({ product }: ProductCardProps) {
   const imageUrl = hasImages ? product.images[0].url : null;
   const imageAlt = hasImages ? (product.images[0].alt || product.name) : product.name;
 
-  // Debug logging
-  console.log('ProductCard:', {
-    name: product.name,
-    hasImages,
-    imageUrl,
-    imagesArray: product.images
-  });
-
   return (
     <Link href={`/products/${product.slug}`}>
       <div className="bg-white rounded-xl shadow-soft overflow-hidden hover:shadow-soft-lg transition-all duration-300 h-full flex flex-col hover:-translate-y-1">
