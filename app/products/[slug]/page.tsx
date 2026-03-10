@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ReviewSection } from '@/components/products/ReviewSection';
+import { FaStar, FaShoppingCart, FaCheck, FaBox, FaTag } from 'react-icons/fa';
 
 export default function ProductPage() {
   const params = useParams();
@@ -44,7 +45,7 @@ export default function ProductPage() {
         setLoading(true);
         setError('');
 
-        const res = await fetch(`/api/products/${encodeURIComponent(slug)}`, {
+        const res = await fetch(`/api/products/${slug}`, {
           signal: controller.signal,
         });
 
@@ -147,13 +148,13 @@ export default function ProductPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         {/* Images */}
         <div>
-          <div className="bg-gray-100 rounded-xl overflow-hidden mb-4 h-96 relative">
+          <div className="bg-gray-100 rounded-xl overflow-hidden mb-4 h-96 relative flex items-center justify-center">
             {currentImage ? (
               <Image 
                 src={currentImage.url} 
                 alt={currentImage.alt || product.name}
                 fill 
-                className="object-cover"
+                className="object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
@@ -214,7 +215,7 @@ export default function ProductPage() {
             <div className="flex items-center gap-2 mb-4">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className={`text-lg ${star <= Math.round(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                  <FaStar key={star} className={`text-lg ${star <= Math.round(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
                 ))}
               </div>
               <span className="text-sm text-gray-600">{product.rating.toFixed(1)} ({product.reviewCount || 0} reviews)</span>
@@ -238,9 +239,9 @@ export default function ProductPage() {
           {/* Stock Status */}
           <div className="mb-6">
             {currentStock > 0 ? (
-              <p className="text-green-600 font-semibold">✓ In Stock ({currentStock} available)</p>
+              <p className="text-green-600 font-semibold flex items-center gap-2"><FaCheck /> In Stock ({currentStock} available)</p>
             ) : (
-              <p className="text-red-600 font-semibold">✗ Out of Stock</p>
+              <p className="text-red-600 font-semibold flex items-center gap-2"><FaBox /> Out of Stock</p>
             )}
           </div>
 
@@ -278,8 +279,16 @@ export default function ProductPage() {
               </div>
 
               <div className="flex gap-3">
-                <Button size="lg" onClick={handleAddToCart} className="flex-1">
-                  {added ? '✓ Added to Cart' : '🛒 Add to Cart'}
+                <Button size="lg" onClick={handleAddToCart} className="flex-1 flex items-center justify-center gap-2">
+                  {added ? (
+                    <>
+                      <FaCheck /> Added to Cart
+                    </>
+                  ) : (
+                    <>
+                      <FaShoppingCart /> Add to Cart
+                    </>
+                  )}
                 </Button>
                 <Link href="/cart">
                   <Button size="lg" variant="outline">View Cart</Button>
@@ -291,10 +300,10 @@ export default function ProductPage() {
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
             <div className="mt-6 pt-6 border-t">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Tags:</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"><FaTag /> Tags:</p>
               <div className="flex flex-wrap gap-2">
-                {product.tags.map((tag: string) => (
-                  <Link key={tag} href={`/products?search=${encodeURIComponent(tag)}`}>
+                {product.tags.map((tag: string, index: number) => (
+                  <Link key={`${tag}-${index}`} href={`/products?search=${encodeURIComponent(tag)}`}>
                     <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-200 cursor-pointer">{tag}</span>
                   </Link>
                 ))}
@@ -420,7 +429,7 @@ export default function ProductPage() {
             <ul className="space-y-3">
               {product.features.map((feature: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl mt-0.5">✓</span>
+                  <FaCheck className="text-green-500 text-lg mt-1 flex-shrink-0" />
                   <span className="text-gray-700 text-lg">{feature}</span>
                 </li>
               ))}

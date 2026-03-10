@@ -32,14 +32,17 @@ export default function DeliveryUpdatePage() {
       const res = await fetch(`/api/admin/delivery/${deliveryId}`);
       if (res.ok) {
         const data = await res.json();
-        setDelivery(data);
+        const delivery = data.delivery;
+        setDelivery(delivery);
         setFormData({
-          status: data.status,
-          estimatedDeliveryDate: data.estimatedDeliveryDate?.split('T')[0] || '',
-          actualDeliveryDate: data.actualDeliveryDate?.split('T')[0] || '',
-          location: data.location || '',
-          notes: data.notes || '',
+          status: delivery.status,
+          estimatedDeliveryDate: delivery.estimatedDeliveryDate?.split('T')[0] || '',
+          actualDeliveryDate: delivery.actualDeliveryDate?.split('T')[0] || '',
+          location: delivery.location || '',
+          notes: delivery.notes || '',
         });
+      } else {
+        console.error('Failed to fetch delivery:', res.status);
       }
     } catch (error) {
       console.error('Failed to fetch delivery:', error);

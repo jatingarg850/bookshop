@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+import { FaUser, FaMapMarkerAlt, FaBox, FaCog, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
 
 export function UserDropdown() {
   const { data: session } = useSession();
@@ -41,14 +42,9 @@ export function UserDropdown() {
         <span className="hidden sm:inline text-sm font-medium text-gray-700">
           {session.user.name}
         </span>
-        <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
+        <FaChevronDown
+          className={`w-4 h-4 text-gray-600 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (
@@ -64,27 +60,27 @@ export function UserDropdown() {
             <Link
               href="/account/profile"
               onClick={() => setIsOpen(false)}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 block"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 block transition-colors"
             >
-              <img src="/profile.png" alt="Profile" className="w-4 h-4" />
+              <FaUser className="w-4 h-4 text-gray-600" />
               My Profile
             </Link>
 
             <Link
               href="/account/profile"
               onClick={() => setIsOpen(false)}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 block"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 block transition-colors"
             >
-              <span>📍</span>
+              <FaMapMarkerAlt className="w-4 h-4 text-gray-600" />
               Manage Addresses
             </Link>
 
             <Link
               href="/account/orders"
               onClick={() => setIsOpen(false)}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 block"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 block transition-colors"
             >
-              <img src="/cart.png" alt="Orders" className="w-4 h-4" />
+              <FaBox className="w-4 h-4 text-gray-600" />
               My Orders
             </Link>
 
@@ -92,9 +88,9 @@ export function UserDropdown() {
               <Link
                 href="/admin"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 block"
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 block transition-colors"
               >
-                <span>⚙️</span>
+                <FaCog className="w-4 h-4 text-gray-600" />
                 Admin Panel
               </Link>
             )}
@@ -110,9 +106,9 @@ export function UserDropdown() {
                 setIsOpen(false);
                 signOut({ callbackUrl: '/' });
               }}
-              className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2 font-medium"
+              className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-3 font-medium transition-colors"
             >
-              <span>🚪</span>
+              <FaSignOutAlt className="w-4 h-4" />
               Sign Out
             </button>
           </div>

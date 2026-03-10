@@ -6,6 +6,7 @@ import { useCartStore } from '@/lib/store/cartStore';
 import { Button } from '@/components/ui/Button';
 import { UserDropdown } from './UserDropdown';
 import { useState, useEffect } from 'react';
+import { FaPhone, FaEnvelope, FaShoppingCart, FaBars, FaTimes } from 'react-icons/fa';
 
 export function Header() {
   const { data: session } = useSession();
@@ -25,10 +26,12 @@ export function Header() {
           <div className="flex justify-between items-center h-10 text-sm">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <span>📞 +91 98217 38866</span>
+                <FaPhone className="text-sm" />
+                <span>+91 98217 38866</span>
               </div>
               <div className="hidden sm:flex items-center space-x-2">
-                <span>✉️ sre.haryana24@gmail.com</span>
+                <FaEnvelope className="text-sm" />
+                <span>sre.haryana24@gmail.com</span>
               </div>
             </div>
             <div className="hidden sm:block">
@@ -68,7 +71,7 @@ export function Header() {
           {/* Cart and Auth */}
           <div className="flex items-center space-x-4">
             <Link href="/cart" className="relative" suppressHydrationWarning>
-              <img src="/cart.png" alt="Cart" className="w-6 h-6" />
+              <FaShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary-600 transition-colors" />
               {mounted && itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-accent-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {itemCount}
@@ -89,7 +92,7 @@ export function Header() {
               className="md:hidden p-2"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? '✕' : '☰'}
+              {isMenuOpen ? <FaTimes /> : <FaBars />}
             </button>
           </div>
         </div>

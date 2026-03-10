@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { calculateOrderTax } from '@/lib/utils/shippingCalculator';
+import { FaTimesCircle, FaCheckCircle } from 'react-icons/fa';
 
 interface Address {
   _id: string;
@@ -498,10 +499,16 @@ export default function CheckoutPage() {
                     <p className="text-sm text-blue-600 mt-1">Checking serviceability...</p>
                   )}
                   {pincodeValid === false && (
-                    <p className="text-sm text-red-600 mt-1">❌ {pincodeError}</p>
+                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                      <FaTimesCircle className="w-4 h-4" />
+                      {pincodeError}
+                    </p>
                   )}
                   {pincodeValid === true && (
-                    <p className="text-sm text-green-600 mt-1">✓ Pincode is serviceable</p>
+                    <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                      <FaCheckCircle className="w-4 h-4" />
+                      Pincode is serviceable
+                    </p>
                   )}
                 </div>
                 <Input

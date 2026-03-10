@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { FaCheck, FaTimes } from 'react-icons/fa';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
@@ -113,8 +114,8 @@ export default function AdminDashboard() {
               <p className="text-sm text-gray-600 mt-1">
                 Seed default categories and the NCERT + base product catalog into MongoDB (safe upsert).
               </p>
-              {seedMessage && <p className="text-sm text-green-700 mt-2">✓ {seedMessage}</p>}
-              {seedError && <p className="text-sm text-red-700 mt-2">✗ {seedError}</p>}
+              {seedMessage && <p className="text-sm text-green-700 mt-2 flex items-center gap-1"><FaCheck size={14} /> {seedMessage}</p>}
+              {seedError && <p className="text-sm text-red-700 mt-2 flex items-center gap-1"><FaTimes size={14} /> {seedError}</p>}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={seedCategories} isLoading={seeding.categories}>

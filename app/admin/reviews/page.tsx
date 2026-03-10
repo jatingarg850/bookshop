@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Pagination } from '@/components/ui/Pagination';
+import { FaStar } from 'react-icons/fa';
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -74,9 +75,7 @@ export default function AdminReviewsPage() {
                       <h3 className="font-semibold text-lg">{review.title}</h3>
                       <div className="flex gap-1">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i} className={i < review.rating ? '⭐' : '☆'}>
-                            {i < review.rating ? '⭐' : '☆'}
-                          </span>
+                          <FaStar key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} />
                         ))}
                       </div>
                     </div>

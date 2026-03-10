@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { FaCheckCircle, FaTimesCircle, FaArrowLeft } from 'react-icons/fa';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -63,8 +64,9 @@ export default function ShiprocketTestPage() {
     <AdminLayout>
       <div className="max-w-4xl mx-auto">
         <Link href="/admin/orders">
-          <Button variant="outline" className="mb-6">
-            ← Back to Orders
+          <Button variant="outline" className="mb-6 flex items-center gap-2">
+            <FaArrowLeft size={16} />
+            Back to Orders
           </Button>
         </Link>
 
@@ -144,13 +146,25 @@ export default function ShiprocketTestPage() {
             
             <div className="bg-gray-50 p-4 rounded mb-4">
               <p className="text-sm text-gray-600">
-                <strong>Route:</strong> {result.pickup_postcode} → {result.delivery_postcode}
+                <strong>Route:</strong> {result.pickup_postcode} <FaArrowLeft className="inline mx-1 rotate-180" size={14} /> {result.delivery_postcode}
               </p>
               <p className="text-sm text-gray-600">
                 <strong>Weight:</strong> {result.weight} kg
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Status:</strong> {result.success ? '✅ Success' : '❌ Failed'}
+                <strong>Status:</strong> <span className="flex items-center gap-1 inline-flex">
+                  {result.success ? (
+                    <>
+                      <FaCheckCircle className="w-4 h-4 text-green-600" />
+                      <span className="text-green-600">Success</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaTimesCircle className="w-4 h-4 text-red-600" />
+                      <span className="text-red-600">Failed</span>
+                    </>
+                  )}
+                </span>
               </p>
               {result.message && (
                 <p className="text-sm text-gray-600 mt-2">

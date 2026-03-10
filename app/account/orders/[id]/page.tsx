@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { FaPrint, FaFileInvoice } from 'react-icons/fa';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { printHtml } from '@/lib/utils/print';
@@ -92,11 +93,13 @@ export default function OrderDetailPage() {
         <div className="flex gap-3">
           {invoice && (
             <>
-              <Button variant="outline" onClick={() => setShowInvoice(!showInvoice)}>
-                {showInvoice ? 'Hide Invoice' : '📄 View Invoice'}
+              <Button variant="outline" onClick={() => setShowInvoice(!showInvoice)} className="flex items-center gap-2">
+                <FaFileInvoice size={16} />
+                {showInvoice ? 'Hide Invoice' : 'View Invoice'}
               </Button>
-              <Button onClick={handlePrint}>
-                🖨️ Print Invoice
+              <Button onClick={handlePrint} className="flex items-center gap-2">
+                <FaPrint size={16} />
+                Print Invoice
               </Button>
             </>
           )}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { FaArrowLeft } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -63,8 +64,9 @@ export default function OrderTrackingPage() {
     <div className="container-max py-12">
       <div className="max-w-2xl mx-auto">
         <Link href="/">
-          <Button variant="outline" className="mb-6">
-            ← Back Home
+          <Button variant="outline" className="mb-6 flex items-center gap-2">
+            <FaArrowLeft size={16} />
+            Back Home
           </Button>
         </Link>
 

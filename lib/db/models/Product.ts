@@ -20,7 +20,7 @@ export interface IProduct extends Document {
   // Optional education/catalog metadata (e.g. NCERT)
   externalId?: string;
   board?: string;
-  class?: number;
+  class?: string;
   subject?: string;
   medium?: 'English' | 'Hindi';
   inStock?: boolean;
@@ -120,9 +120,7 @@ const productSchema = new Schema<IProduct>(
       trim: true,
     },
     class: {
-      type: Number,
-      min: 1,
-      max: 12,
+      type: Schema.Types.Mixed,
     },
     subject: {
       type: String,

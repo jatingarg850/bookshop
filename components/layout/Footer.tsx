@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { subscribeNewsletter } from '../../app/lib/db';
+import { FaFacebook, FaInstagram, FaTwitter, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 
 export function Footer() {
   const [email, setEmail] = useState('');
@@ -39,7 +40,7 @@ export function Footer() {
                 target="_blank"
                 rel="noreferrer"
               >
-                f
+                <FaFacebook className="text-lg" />
               </a>
               <a
                 href="https://www.instagram.com"
@@ -47,7 +48,7 @@ export function Footer() {
                 target="_blank"
                 rel="noreferrer"
               >
-                📷
+                <FaInstagram className="text-lg" />
               </a>
               <a
                 href="https://x.com"
@@ -55,7 +56,7 @@ export function Footer() {
                 target="_blank"
                 rel="noreferrer"
               >
-                𝕏
+                <FaTwitter className="text-lg" />
               </a>
             </div>
           </div>
@@ -119,17 +120,17 @@ export function Footer() {
             <h4 className="text-lg font-semibold">Contact Info</h4>
             <div className="space-y-3 text-sm">
               <div className="flex items-start space-x-3">
-                <span className="text-primary-400 flex-shrink-0">📍</span>
+                <FaMapMarkerAlt className="text-primary-400 flex-shrink-0 mt-1" />
                 <span className="text-gray-400">
                   J - 90 , DLF , Sector 10, Faridabad, Haryana - 121006
                 </span>
               </div>
               <div className="flex items-center space-x-3">
-                <span className="text-primary-400 flex-shrink-0">📞</span>
+                <FaPhone className="text-primary-400 flex-shrink-0" />
                 <span className="text-gray-400">+91 98217 38866</span>
               </div>
               <div className="flex items-center space-x-3">
-                <span className="text-primary-400 flex-shrink-0">✉️</span>
+                <FaEnvelope className="text-primary-400 flex-shrink-0" />
                 <span className="text-gray-400">sre.haryana24@gmail.com</span>
               </div>
               <div className="flex items-start space-x-3">

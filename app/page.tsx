@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ProductCard } from '@/components/products/ProductCard';
 import { products as staticProducts } from '@/data/products';
+import { FaStar, FaTruck, FaLock, FaArrowRight } from 'react-icons/fa';
 
 interface ProductData {
   _id: string;
@@ -43,8 +44,8 @@ export default function Home() {
                 </p>
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
                   <Link href="/products">
-                    <Button size="lg" className="w-full sm:w-auto">
-                      Shop Now →
+                    <Button size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2">
+                      Shop Now <FaArrowRight size={16} />
                     </Button>
                   </Link>
                   <Link href="/about">
@@ -69,7 +70,7 @@ export default function Home() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
-                  ⭐
+                  <FaStar className="text-primary-600" />
                 </div>
               </div>
               <div className="ml-4">
@@ -81,7 +82,7 @@ export default function Home() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
-                  🚚
+                  <FaTruck className="text-primary-600" />
                 </div>
               </div>
               <div className="ml-4">
@@ -93,7 +94,7 @@ export default function Home() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
-                  🔒
+                  <FaLock className="text-primary-600" />
                 </div>
               </div>
               <div className="ml-4">

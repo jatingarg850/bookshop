@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { FaGoogle } from 'react-icons/fa';
 
 export function SignInForm() {
   const router = useRouter();
@@ -99,9 +100,9 @@ export function SignInForm() {
         size="lg"
         isLoading={googleLoading}
         onClick={handleGoogleSignIn}
-        className="w-full mb-6"
+        className="w-full mb-6 flex items-center justify-center gap-2"
       >
-        🔵 Google
+        <FaGoogle /> Google
       </Button>
 
       <div className="pt-6 border-t text-center">

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Pagination } from '@/components/ui/Pagination';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 interface Category {
   _id: string;
@@ -156,7 +157,10 @@ export default function AdminCategoriesPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-heading text-3xl font-bold">Categories & Subcategories</h1>
         {!showForm && (
-          <Button onClick={() => setShowForm(true)}>+ Add Category</Button>
+          <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
+            <FaPlus size={16} />
+            Add Category
+          </Button>
         )}
       </div>
 
@@ -307,15 +311,18 @@ export default function AdminCategoriesPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(category)}
+                      className="flex items-center gap-2"
                     >
+                      <FaEdit size={14} />
                       Edit
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(category._id)}
-                      className="text-red-600 border-red-300"
+                      className="text-red-600 border-red-300 flex items-center gap-2"
                     >
+                      <FaTrash size={14} />
                       Delete
                     </Button>
                   </div>

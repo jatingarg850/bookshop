@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaSpinner } from 'react-icons/fa';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline';
@@ -36,7 +37,7 @@ export function Button({
       disabled={disabled || isLoading}
       {...props}
     >
-      {isLoading && <span className="animate-spin">⏳</span>}
+      {isLoading && <FaSpinner className="animate-spin" size={16} />}
       {children}
     </button>
   );

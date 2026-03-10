@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { FaCheck } from 'react-icons/fa';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -277,7 +278,7 @@ export default function EditProductPage() {
                         </div>
                       )}
                       {formData.category && categorySearch && (
-                        <p className="text-xs text-green-600 mt-1">✓ Category selected: {categorySearch}</p>
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><FaCheck size={12} /> Category selected: {categorySearch}</p>
                       )}
                     </div>
                     <div className="grid grid-cols-3 gap-4">

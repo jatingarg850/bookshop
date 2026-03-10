@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Input } from '@/components/ui/Input';
 import { Pagination } from '@/components/ui/Pagination';
+import { FaSearch, FaFilter, FaSort, FaTimes } from 'react-icons/fa';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -12,6 +13,7 @@ function ProductsContent() {
   // Filters: default values that don't exclude products
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [classLevel, setClassLevel] = useState('');
   const [minPrice, setMinPrice] = useState(''); // empty means no min
   const [maxPrice, setMaxPrice] = useState(''); // empty means no max
   const [minPriceInput, setMinPriceInput] = useState(''); // for input display
@@ -35,6 +37,7 @@ function ProductsContent() {
   const hasActiveFilters =
     search.trim() !== '' ||
     (category && category !== 'All') ||
+    classLevel.trim() !== '' ||
     minPrice.trim() !== '' ||
     maxPrice.trim() !== '' ||
     inStock ||
@@ -44,6 +47,7 @@ function ProductsContent() {
   const resetFilters = () => {
     setSearch('');
     setCategory('All');
+    setClassLevel('');
     setMinPrice('');
     setMaxPrice('');
     setMinPriceInput('');
@@ -115,6 +119,7 @@ function ProductsContent() {
 
         if (search.trim()) params.set('search', search.trim());
         if (category && category !== 'All') params.set('category', category);
+        if (classLevel.trim()) params.set('class', classLevel.trim());
         if (minPrice.trim()) params.set('minPrice', minPrice.trim());
         if (maxPrice.trim()) params.set('maxPrice', maxPrice.trim());
         if (inStock) params.set('inStock', 'true');
@@ -129,6 +134,7 @@ function ProductsContent() {
           limit,
           search,
           category,
+          classLevel,
           minPrice,
           maxPrice,
           inStock,
@@ -189,7 +195,7 @@ function ProductsContent() {
       clearTimeout(t);
       controller.abort();
     };
-  }, [search, category, minPrice, maxPrice, inStock, onSale, sort, page]);
+  }, [search, category, classLevel, minPrice, maxPrice, inStock, onSale, sort, page]);
 
   // If API reduced page count (e.g. after filters), clamp locally.
   useEffect(() => {
@@ -212,15 +218,16 @@ function ProductsContent() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           {/* Search */}
-          <div className="mb-8">
+          <div className="mb-8 relative">
+            <FaSearch className="absolute left-4 top-3.5 text-gray-400 text-lg" />
             <Input
-              placeholder="🔍 Search products by name or description..."
+              placeholder="Search products by name or description..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full text-lg"
+              className="w-full text-lg pl-10"
             />
           </div>
 
@@ -257,6 +264,9 @@ function ProductsContent() {
                     <option value="price-asc">Price: Low to High</option>
                     <option value="price-desc">Price: High to Low</option>
                     <option value="name-asc">Name: A-Z</option>
+                    <option value="class-asc">Class: Low to High</option>
+                    <option value="class-desc">Class: High to Low</option>
+                    <option value="subject-asc">Subject: A-Z</option>
                   </select>
                 </div>
 
@@ -279,6 +289,38 @@ function ProductsContent() {
                         {cat}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="h-px bg-gray-200"></div>
+
+                {/* Class Filter */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-3">Class</label>
+                  <select
+                    value={classLevel}
+                    onChange={(e) => {
+                      setClassLevel(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="">All Classes</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <option value="1">Class 1</option>
+                    <option value="2">Class 2</option>
+                    <option value="3">Class 3</option>
+                    <option value="4">Class 4</option>
+                    <option value="5">Class 5</option>
+                    <option value="6">Class 6</option>
+                    <option value="7">Class 7</option>
+                    <option value="8">Class 8</option>
+                    <option value="9">Class 9</option>
+                    <option value="10">Class 10</option>
+                    <option value="11">Class 11</option>
+                    <option value="12">Class 12</option>
                   </select>
                 </div>
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { FaSync, FaArrowLeft, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -238,8 +239,9 @@ export default function AdminOrderDetailPage() {
     <AdminLayout>
       <div className="max-w-4xl mx-auto">
         <Link href="/admin/orders">
-          <Button variant="outline" className="mb-6">
-            ← Back to Orders
+          <Button variant="outline" className="mb-6 flex items-center gap-2">
+            <FaArrowLeft size={16} />
+            Back to Orders
           </Button>
         </Link>
 
@@ -306,12 +308,12 @@ export default function AdminOrderDetailPage() {
 
             {loadingRates ? (
               <div className="flex items-center space-x-2 text-gray-600">
-                <div className="animate-spin">⏳</div>
+                <FaSpinner className="animate-spin" size={18} />
                 <p>Loading shipping rates...</p>
               </div>
             ) : rateError ? (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                <p className="text-red-700 font-semibold">⚠️ Unable to fetch shipping rates</p>
+                <p className="text-red-700 font-semibold flex items-center gap-2"><FaExclamationTriangle /> Unable to fetch shipping rates</p>
                 <p className="text-red-600 text-sm mt-1">{rateError}</p>
                 <p className="text-red-600 text-xs mt-1">
                   <strong>Debug info:</strong> Check browser console (F12) for detailed logs. Verify:
@@ -325,7 +327,7 @@ export default function AdminOrderDetailPage() {
               </div>
             ) : shippingRates.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-yellow-700 font-semibold">⚠️ No shipping rates available</p>
+                <p className="text-yellow-700 font-semibold flex items-center gap-2"><FaExclamationTriangle /> No shipping rates available</p>
                 <p className="text-yellow-600 text-sm mt-1">
                   This may mean Shiprocket doesn't service the delivery location.
                 </p>
@@ -422,9 +424,10 @@ export default function AdminOrderDetailPage() {
                 <Button
                   onClick={handleTrackOrder}
                   variant="outline"
-                  className="w-full mt-4"
+                  className="w-full mt-4 flex items-center justify-center gap-2"
                 >
-                  🔄 Update Tracking
+                  <FaSync className="w-4 h-4" />
+                  Update Tracking
                 </Button>
               )}
             </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { FaCheck } from 'react-icons/fa';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -81,6 +82,11 @@ export default function NewProductPage() {
     cgst: '',
     sgst: '',
     igst: '',
+    // Education metadata
+    board: '',
+    class: '',
+    subject: '',
+    medium: '',
   });
 
   useEffect(() => {
@@ -264,6 +270,7 @@ export default function NewProductPage() {
           cgst: formData.cgst ? parseFloat(formData.cgst) : undefined,
           sgst: formData.sgst ? parseFloat(formData.sgst) : undefined,
           igst: formData.igst ? parseFloat(formData.igst) : undefined,
+          class: formData.class ? formData.class : undefined,
           variations: variations.map(v => ({
             ...v,
             quantity: parseInt(String(v.quantity)) || 0,
@@ -391,7 +398,7 @@ export default function NewProductPage() {
                           ))}
                         </div>
                       )}
-                      {formData.category && <p className="text-xs text-green-600 mt-1">✓ Category selected</p>}
+                      {formData.category && <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><FaCheck size={12} /> Category selected</p>}
                     </div>
 
                     {subcategories.length > 0 && (
@@ -596,6 +603,52 @@ export default function NewProductPage() {
                       ))}
                     </div>
                   )}
+                </div>
+
+                {/* Tags & Flags */}
+                <div>
+                  <h2 className="font-heading text-xl font-bold mb-4">Education Metadata (Optional)</h2>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input label="Board" value={formData.board}
+                        onChange={(e) => setFormData({ ...formData, board: e.target.value })} placeholder="e.g., NCERT, CBSE" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Class</label>
+                        <select value={formData.class} onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                          <option value="">Select Class</option>
+                          <option value="Nursery">Nursery</option>
+                          <option value="LKG">LKG</option>
+                          <option value="UKG">UKG</option>
+                          <option value="1">Class 1</option>
+                          <option value="2">Class 2</option>
+                          <option value="3">Class 3</option>
+                          <option value="4">Class 4</option>
+                          <option value="5">Class 5</option>
+                          <option value="6">Class 6</option>
+                          <option value="7">Class 7</option>
+                          <option value="8">Class 8</option>
+                          <option value="9">Class 9</option>
+                          <option value="10">Class 10</option>
+                          <option value="11">Class 11</option>
+                          <option value="12">Class 12</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input label="Subject" value={formData.subject}
+                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })} placeholder="e.g., Hindi, Mathematics" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Medium</label>
+                        <select value={formData.medium} onChange={(e) => setFormData({ ...formData, medium: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                          <option value="">Select Medium</option>
+                          <option value="English">English</option>
+                          <option value="Hindi">Hindi</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Tags & Flags */}

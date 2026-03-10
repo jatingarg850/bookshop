@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/Card';
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaCheck } from 'react-icons/fa';
 
 export default function AboutPage() {
   return (
@@ -56,27 +57,27 @@ export default function AboutPage() {
                 <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Why Choose Us?</h2>
                 <ul className="space-y-3 text-gray-700">
                   <li className="flex gap-3">
-                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <FaCheck className="text-2xl text-primary-600 flex-shrink-0 mt-1" />
                     <span>Wide selection of products across all categories</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <FaCheck className="text-2xl text-primary-600 flex-shrink-0 mt-1" />
                     <span>Competitive pricing and regular discounts</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <FaCheck className="text-2xl text-primary-600 flex-shrink-0 mt-1" />
                     <span>Fast and reliable delivery across India</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <FaCheck className="text-2xl text-primary-600 flex-shrink-0 mt-1" />
                     <span>Easy returns and hassle-free customer support</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <FaCheck className="text-2xl text-primary-600 flex-shrink-0 mt-1" />
                     <span>Secure payment options and data protection</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-2xl text-primary-600 flex-shrink-0">✓</span>
+                    <FaCheck className="text-2xl text-primary-600 flex-shrink-0 mt-1" />
                     <span>Authentic products from trusted brands</span>
                   </li>
                 </ul>
@@ -89,15 +90,24 @@ export default function AboutPage() {
                 <h2 className="font-heading text-xl font-bold mb-6 text-gray-900">Quick Info</h2>
                 <div className="space-y-6">
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">📧 Email</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaEnvelope className="w-4 h-4 text-primary-600" />
+                      <p className="text-sm text-gray-600 font-semibold">Email</p>
+                    </div>
                     <p className="font-semibold text-gray-900">sre.haryana24@gmail.com</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">📞 Phone</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaPhone className="w-4 h-4 text-primary-600" />
+                      <p className="text-sm text-gray-600 font-semibold">Phone</p>
+                    </div>
                     <p className="font-semibold text-gray-900">+91 98217 38866</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">📍 Address</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaMapMarkerAlt className="w-4 h-4 text-primary-600" />
+                      <p className="text-sm text-gray-600 font-semibold">Address</p>
+                    </div>
                     <p className="font-semibold text-gray-900">
                       J - 90 , DLF , Sector 10<br />
                       Faridabad<br />

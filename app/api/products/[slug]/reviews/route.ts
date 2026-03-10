@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { products as staticProducts } from '@/data/products';
+import { connectDB } from '@/lib/db/connect';
+import Product from '@/lib/db/models/Product';
 import { addMockReview, listMockReviews } from '@/lib/mockReviewStore';
 
 export async function GET(
@@ -9,7 +10,8 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const product = staticProducts.find((p: any) => p.slug === slug);
+    await connectDB();
+    const product = await Product.findOne({ slug });
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
@@ -40,7 +42,8 @@ export async function POST(
   try {
     const { slug } = await params;
 
-    const product = staticProducts.find((p: any) => p.slug === slug);
+    await connectDB();
+    const product = await Product.findOne({ slug });
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
@@ -59,7 +62,7 @@ export async function POST(
       createdAt: new Date().toISOString(),
     };
 
-        addMockReview(slug, review);
+    addMockReview(slug, review);
 
     return NextResponse.json(review, { status: 201 });
   } catch (error: any) {

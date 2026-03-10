@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -72,8 +73,9 @@ export default function ContactPage() {
                 <h2 className="font-heading text-2xl font-bold mb-6 text-gray-900">Send us a Message</h2>
 
                 {submitted && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-                    ✓ Thank you for your message! We'll get back to you soon.
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+                    <FaCheckCircle className="text-green-600" />
+                    Thank you for your message! We'll get back to you soon.
                   </div>
                 )}
 
@@ -124,15 +126,24 @@ export default function ContactPage() {
                 <h2 className="font-heading text-xl font-bold mb-6 text-gray-900">Contact Information</h2>
                 <div className="space-y-6">
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">📧 Email</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaEnvelope className="w-4 h-4 text-primary-600" />
+                      <p className="text-sm text-gray-600 font-semibold">Email</p>
+                    </div>
                     <p className="font-semibold text-gray-900">sre.haryana24@gmail.com</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">📞 Phone</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaPhone className="w-4 h-4 text-primary-600" />
+                      <p className="text-sm text-gray-600 font-semibold">Phone</p>
+                    </div>
                     <p className="font-semibold text-gray-900">+91 98217 38866</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">📍 Address</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaMapMarkerAlt className="w-4 h-4 text-primary-600" />
+                      <p className="text-sm text-gray-600 font-semibold">Address</p>
+                    </div>
                     <p className="font-semibold text-gray-900">
                       J - 90 , DLF , Sector 10<br />
                       Faridabad<br />

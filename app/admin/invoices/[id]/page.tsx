@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import { FaPrint } from 'react-icons/fa';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { printHtml } from '@/lib/utils/print';
@@ -58,8 +59,9 @@ export default function AdminInvoicePage() {
       <div className="max-w-4xl mx-auto" suppressHydrationWarning>
         <div className="flex justify-between items-center mb-6">
           <h1 className="font-heading text-3xl font-bold">Invoice Details</h1>
-          <Button onClick={handlePrint}>
-            🖨️ Print Invoice
+          <Button onClick={handlePrint} className="flex items-center gap-2">
+            <FaPrint size={16} />
+            Print Invoice
           </Button>
         </div>
 

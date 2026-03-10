@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Pagination } from '@/components/ui/Pagination';
+import { FaDownload, FaUpload, FaPlus, FaCheckCircle, FaExclamationCircle, FaFileAlt, FaEdit, FaTrash } from 'react-icons/fa';
 
 type ProductStatus = 'active' | 'inactive' | 'draft';
 
@@ -114,10 +115,10 @@ export default function AdminProductsPage() {
   const pages = Math.ceil(total / limit);
 
   const getStatusBadge = (status: ProductStatus | undefined) => {
-    const badges: Record<ProductStatus, { bgColor: string; textColor: string; label: string }> = {
-      active: { bgColor: '#dcfce7', textColor: '#166534', label: '✓ Active' },
-      inactive: { bgColor: '#fef3c7', textColor: '#92400e', label: '⚠ Inactive' },
-      draft: { bgColor: '#f3f4f6', textColor: '#374151', label: '✎ Draft' },
+    const badges: Record<ProductStatus, { bgColor: string; textColor: string; label: string; icon: React.ReactNode }> = {
+      active: { bgColor: '#dcfce7', textColor: '#166534', label: 'Active', icon: <FaCheckCircle className="w-3 h-3 inline mr-1" /> },
+      inactive: { bgColor: '#fef3c7', textColor: '#92400e', label: 'Inactive', icon: <FaExclamationCircle className="w-3 h-3 inline mr-1" /> },
+      draft: { bgColor: '#f3f4f6', textColor: '#374151', label: 'Draft', icon: <FaFileAlt className="w-3 h-3 inline mr-1" /> },
     };
     
     const normalizedStatus = (status || 'draft') as ProductStatus;
@@ -132,9 +133,12 @@ export default function AdminProductsPage() {
           borderRadius: '0.375rem',
           fontSize: '0.75rem',
           fontWeight: '600',
-          display: 'inline-block'
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.25rem'
         }}
       >
+        {badge.icon}
         {badge.label}
       </span>
     );
@@ -145,8 +149,9 @@ export default function AdminProductsPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-heading text-3xl font-bold">Products</h1>
         <div className="flex gap-2">
-          <Button onClick={handleExport} variant="outline">
-            📥 Export CSV
+          <Button onClick={handleExport} variant="outline" className="flex items-center gap-2">
+            <FaDownload className="w-4 h-4" />
+            Export CSV
           </Button>
           <input
             ref={fileInputRef}
@@ -160,24 +165,31 @@ export default function AdminProductsPage() {
             variant="outline" 
             disabled={importing}
             onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2"
           >
-            {importing ? 'Importing...' : '📤 Import CSV'}
+            <FaUpload className="w-4 h-4" />
+            {importing ? 'Importing...' : 'Import CSV'}
           </Button>
           <Link href="/admin/products/new">
-            <Button>+ Add Product</Button>
+            <Button className="flex items-center gap-2">
+              <FaPlus className="w-4 h-4" />
+              Add Product
+            </Button>
           </Link>
         </div>
       </div>
 
       {importMessage && (
-        <Card className="mb-6 bg-green-50 border border-green-200">
-          <p className="text-green-700">✓ {importMessage}</p>
+        <Card className="mb-6 bg-green-50 border border-green-200 flex items-center gap-2">
+          <FaCheckCircle className="w-5 h-5 text-green-600" />
+          <p className="text-green-700">{importMessage}</p>
         </Card>
       )}
 
       {importError && (
-        <Card className="mb-6 bg-red-50 border border-red-200">
-          <p className="text-red-700">✗ {importError}</p>
+        <Card className="mb-6 bg-red-50 border border-red-200 flex items-center gap-2">
+          <FaExclamationCircle className="w-5 h-5 text-red-600" />
+          <p className="text-red-700">{importError}</p>
         </Card>
       )}
 
@@ -202,9 +214,9 @@ export default function AdminProductsPage() {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">All Status</option>
-            <option value="active">✓ Active</option>
-            <option value="inactive">⚠ Inactive</option>
-            <option value="draft">✎ Draft</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="draft">Draft</option>
           </select>
         </Card>
       </div>
@@ -230,13 +242,15 @@ export default function AdminProductsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/admin/products/${product._id}`}>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="flex items-center gap-1">
+                        <FaEdit className="w-4 h-4" />
                         Edit
                       </Button>
                     </Link>
                     <Button
                       variant="outline"
                       size="sm"
+                      className="flex items-center gap-1 text-red-600 hover:text-red-700"
                       onClick={async () => {
                         if (confirm('Delete this product?')) {
                           await fetch(`/api/admin/products/${product._id}`, {
@@ -246,6 +260,7 @@ export default function AdminProductsPage() {
                         }
                       }}
                     >
+                      <FaTrash className="w-4 h-4" />
                       Delete
                     </Button>
                   </div>

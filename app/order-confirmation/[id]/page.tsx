@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { FaCheckCircle, FaPrint, FaDownload } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { InvoiceTemplate } from '@/components/invoice/InvoiceTemplate';
@@ -65,7 +66,9 @@ export default function OrderConfirmationPage() {
     <div className="container-max py-12" suppressHydrationWarning>
       <div className="max-w-2xl mx-auto">
         <Card className="text-center">
-          <div className="text-6xl mb-4">✓</div>
+          <div className="text-6xl mb-4">
+            <FaCheckCircle className="text-green-600 text-6xl mx-auto" />
+          </div>
           <h1 className="font-heading text-3xl font-bold mb-2 text-green-600">
             Order Confirmed!
           </h1>
@@ -112,14 +115,17 @@ export default function OrderConfirmationPage() {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-heading text-2xl font-bold">Invoice</h2>
                 <div className="flex gap-2">
-                  <Button onClick={handlePrint} variant="outline">
-                    🖨️ Print Invoice
+                  <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
+                    <FaPrint className="w-4 h-4" />
+                    Print Invoice
                   </Button>
                   <Button 
                     onClick={() => window.open(`/api/invoices/${id}/download`, '_blank')}
                     variant="outline"
+                    className="flex items-center gap-2"
                   >
-                    📥 Download Invoice
+                    <FaDownload className="w-4 h-4" />
+                    Download Invoice
                   </Button>
                 </div>
               </div>

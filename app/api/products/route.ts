@@ -12,16 +12,28 @@ function escapeRegex(input: string) {
   return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function sortClasses(classes: string[]): string[] {
+  const classOrder = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+  return classes.sort((a, b) => {
+    const indexA = classOrder.indexOf(a);
+    const indexB = classOrder.indexOf(b);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+}
+
 function resolveSort(sortRaw: string) {
   const s = normalize(sortRaw);
 
-  // UI-friendly sort keys
   if (s === '' || s === 'newest') return { field: 'createdAt', dir: -1 } as const;
   if (s === 'price-asc') return { field: 'price', dir: 1 } as const;
   if (s === 'price-desc') return { field: 'price', dir: -1 } as const;
   if (s === 'name-asc') return { field: 'name', dir: 1 } as const;
+  if (s === 'class-asc') return { field: 'class', dir: 1 } as const;
+  if (s === 'class-desc') return { field: 'class', dir: -1 } as const;
+  if (s === 'subject-asc') return { field: 'subject', dir: 1 } as const;
 
-  // Legacy API style: "-createdAt", "price", etc.
   if (s.startsWith('-')) return { field: s.slice(1) || 'createdAt', dir: -1 } as const;
   return { field: s, dir: 1 } as const;
 }
@@ -38,8 +50,6 @@ export async function GET(req: NextRequest) {
     const brand = searchParams.get('brand') || '';
     const color = searchParams.get('color') || '';
     const size = searchParams.get('size') || '';
-
-    // Optional catalog metadata filters
     const board = searchParams.get('board') || '';
     const subject = searchParams.get('subject') || '';
     const medium = searchParams.get('medium') || '';
@@ -61,6 +71,7 @@ export async function GET(req: NextRequest) {
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '12') || 12));
 
     const filter: any = {};
+    const andConditions: any[] = [];
 
     if (status !== 'all') {
       filter.status = status;
@@ -98,11 +109,12 @@ export async function GET(req: NextRequest) {
       filter.medium = new RegExp(`^${escapeRegex(medium)}$`, 'i');
     }
 
+    // Class filter - handle both string and number types
     if (normalize(classLevel)) {
-      const parsed = parseInt(classLevel);
-      if (!Number.isNaN(parsed)) {
-        filter.class = parsed;
-      }
+      const classValue = normalize(classLevel);
+      const classNum = parseInt(classValue);
+      // Query for the number type since that's what's in the database
+      filter.class = classNum;
     }
 
     const min = normalize(minPrice) ? parseFloat(minPrice) : null;
@@ -114,12 +126,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (inStock) {
-      // inStock is kept in sync with stock via model hooks.
       filter.inStock = true;
     }
 
     if (onSale) {
-      // discountPrice exists and is lower than price
       filter.$expr = {
         $and: [
           { $gt: ['$discountPrice', 0] },
@@ -137,37 +147,56 @@ export async function GET(req: NextRequest) {
     if (newArrival) filter.isNewArrival = true;
     if (bestSeller) filter.isBestSeller = true;
 
+    // Search filter
     const searchTerm = normalize(search);
     if (searchTerm) {
       const re = escapeRegex(searchTerm);
-      filter.$or = [
-        { name: { $regex: re, $options: 'i' } },
-        { description: { $regex: re, $options: 'i' } },
-        { sku: { $regex: re, $options: 'i' } },
-        { tags: { $elemMatch: { $regex: re, $options: 'i' } } },
-        { board: { $regex: re, $options: 'i' } },
-        { subject: { $regex: re, $options: 'i' } },
-      ];
+      andConditions.push({
+        $or: [
+          { name: { $regex: re, $options: 'i' } },
+          { description: { $regex: re, $options: 'i' } },
+          { sku: { $regex: re, $options: 'i' } },
+          { tags: { $elemMatch: { $regex: re, $options: 'i' } } },
+          { board: { $regex: re, $options: 'i' } },
+          { subject: { $regex: re, $options: 'i' } },
+        ]
+      });
+    }
+
+    // Combine all $and conditions if any exist
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
 
     const { field, dir } = resolveSort(sortRaw);
-    const sort: any = { 
+    const sort: any = {
       isFeatured: -1,
-      // Prioritize products with images
-      'images.0': -1  // Products with at least one image come first
+      'images.0': -1
     };
-    sort[field] = dir;
-    if (field !== 'createdAt') sort.createdAt = -1;
+
+    if (field === 'class') {
+      sort[field] = dir;
+      sort.subject = 1;
+      sort.createdAt = -1;
+    } else if (field === 'subject') {
+      sort[field] = dir;
+      sort.class = 1;
+      sort.createdAt = -1;
+    } else {
+      sort[field] = dir;
+      if (field !== 'createdAt') sort.createdAt = -1;
+    }
 
     const skip = (page - 1) * limit;
 
-    const [products, total, categories, brands, colors, sizes] = await Promise.all([
+    const [products, total, categories, brands, colors, sizes, classes] = await Promise.all([
       Product.find(filter).sort(sort).skip(skip).limit(limit).lean(),
       Product.countDocuments(filter),
       Product.distinct('category', { status: 'active' }),
       Product.distinct('brand', { status: 'active' }),
       Product.distinct('color', { status: 'active' }),
       Product.distinct('size', { status: 'active' }),
+      Product.distinct('class', { status: 'active', class: { $exists: true, $ne: null } }),
     ]);
 
     const clean = (arr: any[]) => {
@@ -191,6 +220,7 @@ export async function GET(req: NextRequest) {
         brands: clean(brands).sort(),
         colors: clean(colors).sort(),
         sizes: clean(sizes).sort(),
+        classes: sortClasses(clean(classes)),
       },
     });
   } catch (error: any) {

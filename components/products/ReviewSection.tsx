@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { FaStar } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -84,9 +85,11 @@ export function ReviewSection({ productSlug }: ReviewSectionProps) {
             <div className="text-5xl font-bold text-primary-600 mb-2">{avgRating}</div>
             <div className="flex gap-1 justify-center mb-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className="text-2xl">
-                  {i < Math.round(avgRating) ? '⭐' : '☆'}
-                </span>
+                <FaStar
+                  key={i}
+                  size={24}
+                  className={i < Math.round(avgRating) ? 'text-yellow-400' : 'text-gray-300'}
+                />
               ))}
             </div>
             <p className="text-sm text-gray-600">
@@ -119,9 +122,12 @@ export function ReviewSection({ productSlug }: ReviewSectionProps) {
                     key={star}
                     type="button"
                     onClick={() => setFormData({ ...formData, rating: star })}
-                    className="text-3xl transition-transform hover:scale-110"
+                    className="transition-transform hover:scale-110"
                   >
-                    {star <= formData.rating ? '⭐' : '☆'}
+                    <FaStar
+                      size={28}
+                      className={star <= formData.rating ? 'text-yellow-400' : 'text-gray-300'}
+                    />
                   </button>
                 ))}
               </div>
@@ -195,9 +201,11 @@ export function ReviewSection({ productSlug }: ReviewSectionProps) {
                   <h4 className="font-semibold text-lg">{review.title}</h4>
                   <div className="flex gap-1 mt-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className="text-lg">
-                        {i < review.rating ? '⭐' : '☆'}
-                      </span>
+                      <FaStar
+                        key={i}
+                        size={18}
+                        className={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}
+                      />
                     ))}
                   </div>
                 </div>
