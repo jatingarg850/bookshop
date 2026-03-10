@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Input } from '@/components/ui/Input';
 import { Pagination } from '@/components/ui/Pagination';
-import { FaSearch, FaFilter, FaSort, FaTimes } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
